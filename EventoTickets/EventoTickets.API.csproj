@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="BusinessWorkFlow\" />
+    <Folder Include="ServiceGateway\" />
   </ItemGroup>
 
 </Project>
