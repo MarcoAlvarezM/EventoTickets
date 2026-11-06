@@ -1,0 +1,61 @@
+@page
+@model EventoTickets.Web.Pages.Cuenta.LoginModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+    Layout = "_AuthLayout";
+}
+<section class="tarjeta p-6 sm:p-8 space-y-6">
+    <div class="space-y-2">
+        <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container text-secondary font-code-sm text-code-sm uppercase">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Portal de usuarios
+        </span>
+        <h1 class="font-headline-xl text-headline-xl-mobile sm:text-headline-xl text-on-surface tracking-tight">Iniciar Sesión</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Accede a tus entradas digitales, gestiona pedidos y reporta tus pagos manuales.</p>
+    </div>
+
+    <div class="flex items-start gap-3 rounded-lg bg-surface-container-low p-4">
+        <span class="material-symbols-outlined text-secondary">verified_user</span>
+        <div>
+            <p class="font-label-md text-label-md text-on-surface font-semibold">Acceso seguro</p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Tu sesión se protege con un token firmado y tu contraseña nunca se almacena en texto plano.</p>
+        </div>
+    </div>
+
+    <form method="post" class="flex flex-col gap-5" novalidate>
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Entrada.CorreoElectronico" class="campo-label">Correo electrónico</label>
+            <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">mail</span>
+                <input asp-for="Entrada.CorreoElectronico" class="campo-input pl-10 bg-surface-container-lowest shadow-sm" placeholder="ejemplo@correo.com" autocomplete="email" />
+            </div>
+            <span asp-validation-for="Entrada.CorreoElectronico"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Entrada.Password" class="campo-label">Contraseña</label>
+            <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">lock</span>
+                <input asp-for="Entrada.Password" id="clave" class="campo-input pl-10 pr-11 bg-surface-container-lowest shadow-sm font-mono" placeholder="••••••••" autocomplete="current-password" />
+                <button type="button" class="absolute right-2.5 p-1 text-on-surface-variant hover:text-on-surface" data-alternar-clave="clave" aria-label="Ver u ocultar contraseña">
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                </button>
+            </div>
+            <span asp-validation-for="Entrada.Password"></span>
+        </div>
+        <label class="flex items-center gap-2.5 cursor-pointer select-none">
+            <input asp-for="Recordar" class="w-4 h-4 rounded accent-secondary" />
+            <span class="font-body-md text-body-md text-on-surface">Recordar mi sesión en este dispositivo</span>
+        </label>
+        <button type="submit" class="w-full h-12 bg-secondary hover:bg-secondary-container text-on-secondary font-headline-md text-headline-md rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1;">lock_open</span>Iniciar Sesión
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+    </form>
+
+    <div class="pt-4 flex flex-col items-center gap-2 bg-surface-container-low/50 rounded-lg p-4 text-center">
+        <span class="font-body-md text-body-md text-on-surface-variant">¿Aún no tienes una cuenta?</span>
+        <a asp-page="/Cuenta/Registro" asp-route-returnUrl="@Model.ReturnUrl" class="font-label-md text-label-md text-secondary font-semibold hover:underline">Regístrate como comprador</a>
+    </div>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

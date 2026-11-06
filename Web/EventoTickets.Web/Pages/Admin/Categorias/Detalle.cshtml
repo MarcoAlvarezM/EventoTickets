@@ -1,0 +1,14 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.Categorias.DetalleModel
+@{ ViewData["Title"] = Model.Registro.Nombre; var c = Model.Registro; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Categorías</a> › Detalle</nav>
+<section class="tarjeta p-6 space-y-5 max-w-3xl">
+    <div class="flex items-center justify-between gap-3"><div class="flex items-center gap-3"><h1 class="font-headline-lg text-headline-lg">@c.Nombre</h1><partial name="_EstadoBadge" model="@(c.Activo ? "Activo" : "Inactivo")" /></div>
+        <div class="flex gap-2"><a asp-page="Editar" asp-route-id="@c.CategoriaId" class="btn-tonal">Editar</a><a asp-page="Eliminar" asp-route-id="@c.CategoriaId" class="btn-suave text-error">Eliminar</a></div></div>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-5 font-body-md text-body-md">
+        <div class="sm:col-span-2"><dt class="campo-ayuda uppercase">Descripción</dt><dd>@(c.Descripcion ?? "—")</dd></div>
+        <div><dt class="campo-ayuda uppercase">Eventos asociados</dt><dd class="font-headline-md text-headline-md">@c.CantidadEventos</dd></div>
+        <div><dt class="campo-ayuda uppercase">Identificador</dt><dd class="font-code-sm">@c.CategoriaId</dd></div>
+    </dl>
+    @if (c.CantidadEventos > 0) { <p class="rounded-lg bg-surface-container p-3 font-body-sm text-body-sm text-on-surface-variant">Tiene eventos asociados: solo puede desactivarse (borrado lógico).</p> }
+</section>

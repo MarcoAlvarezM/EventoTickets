@@ -1,0 +1,30 @@
+@model LocacionRequest
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="flex flex-col gap-1.5 md:col-span-2">
+        <label asp-for="Nombre" class="campo-label">Nombre del recinto *</label>
+        <input asp-for="Nombre" class="campo-input" placeholder="Ej. Teatro Nacional de Costa Rica" />
+        <span asp-validation-for="Nombre"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="Ciudad" class="campo-label">Ciudad *</label>
+        <input asp-for="Ciudad" class="campo-input" />
+        <span asp-validation-for="Ciudad"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="PabellonPuerta" class="campo-label">Pabellón / puerta de acceso</label>
+        <input asp-for="PabellonPuerta" class="campo-input" placeholder="Ej. Puerta 3" />
+        <span asp-validation-for="PabellonPuerta"></span>
+    </div>
+    <div class="flex flex-col gap-1.5 md:col-span-2">
+        <label asp-for="Direccion" class="campo-label">Dirección *</label>
+        <input asp-for="Direccion" class="campo-input" />
+        <span asp-validation-for="Direccion"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="CapacidadMaxima" class="campo-label">Capacidad máxima (aforo) *</label>
+        <input asp-for="CapacidadMaxima" type="number" min="1" class="campo-input font-code-sm" />
+        <span class="campo-ayuda">La suma de los tipos de entrada de un evento no puede superarla.</span>
+        <span asp-validation-for="CapacidadMaxima"></span>
+    </div>
+    <label class="flex items-center gap-2.5 self-end h-10"><input asp-for="Activo" class="w-4 h-4 accent-secondary" /><span class="font-body-md text-body-md">Locación activa</span></label>
+</div>

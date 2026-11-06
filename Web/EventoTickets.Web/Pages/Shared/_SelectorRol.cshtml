@@ -1,0 +1,23 @@
+@model string
+@* Vista parcial: tarjetas de rol (Stitch "Asignación de rol principal RBAC"). ViewData["Nombre"] = nombre del campo. *@
+@{
+    var nombre = ViewData["Nombre"] as string ?? "Entrada.Rol";
+    var opciones = new (string Rol, string Icono, string Descripcion)[]
+    {
+        (Roles.Superadministrador, "shield_person", "Acceso total, incluida la gestión de usuarios y roles."),
+        (Roles.AdministradorEventos, "event", "Crea y publica eventos, locaciones, categorías y tipos de entrada."),
+        (Roles.AuditorPagos, "account_balance", "Valida comprobantes, aprueba o rechaza pagos y emite entradas."),
+        (Roles.ValidadorAcceso, "qr_code_scanner", "Registra el ingreso de asistentes en puerta."),
+        (Roles.Comprador, "person", "Público general: compra entradas y gestiona sus pedidos.")
+    };
+}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    @foreach (var (rol, icono, descripcion) in opciones)
+    {
+        <label class="relative flex items-start gap-3 rounded-lg p-4 cursor-pointer bg-surface-container-low hover:bg-surface-container has-[:checked]:ring-2 has-[:checked]:ring-secondary has-[:checked]:bg-secondary/5">
+            <input type="radio" name="@nombre" value="@rol" class="mt-1 accent-secondary" @(Model == rol ? "checked" : "") />
+            <span class="material-symbols-outlined text-secondary">@icono</span>
+            <span><span class="block font-label-md text-label-md font-semibold">@Formato.EtiquetaRol(rol)</span><span class="block font-body-sm text-body-sm text-on-surface-variant">@descripcion</span></span>
+        </label>
+    }
+</div>

@@ -1,0 +1,38 @@
+@page
+@model EventoTickets.Web.Pages.Admin.Locaciones.IndexModel
+@{ ViewData["Title"] = "Locaciones"; }
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="space-y-1">
+        <span class="etiqueta-seccion">Recintos</span>
+        <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Locaciones</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Recintos donde se realizan los eventos y su capacidad máxima (aforo).</p>
+    </div>
+    <a asp-page="Crear" class="btn-primario"><span class="material-symbols-outlined text-[18px]">add_circle</span>Nueva locación</a>
+</div>
+<form method="get" class="tarjeta p-4 flex flex-col sm:flex-row gap-3 sm:items-center">
+    <input asp-for="Busqueda" type="search" class="campo-input sm:max-w-sm" placeholder="Buscar por nombre..." />
+    <label class="flex items-center gap-2 font-body-md text-body-md"><input asp-for="SoloActivas" class="w-4 h-4 accent-secondary" />Solo activas</label>
+    <button type="submit" class="btn-tonal">Filtrar</button>
+</form>
+<section class="tarjeta overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead><tr class="tabla-encabezado"><th class="tabla-celda">Recinto</th><th class="tabla-celda">Ciudad</th><th class="tabla-celda">Pabellón / puerta</th><th class="tabla-celda">Aforo máx.</th><th class="tabla-celda">Eventos</th><th class="tabla-celda">Estado</th><th class="tabla-celda text-right">Acciones</th></tr></thead>
+            <tbody class="font-body-sm text-body-sm">
+                @if (Model.Registros.Count == 0) { <tr><td colspan="7" class="tabla-celda text-center text-on-surface-variant">No hay registros.</td></tr> }
+                @foreach (var c in Model.Registros)
+                {
+                    <tr class="hover:bg-surface-container-low">
+                        <td class="tabla-celda font-semibold">@c.Nombre<div class="text-on-surface-variant">@c.Direccion</div></td><td class="tabla-celda ">@c.Ciudad</td><td class="tabla-celda text-on-surface-variant">@c.PabellonPuerta</td><td class="tabla-celda font-code-sm text-right">@c.CapacidadMaxima.ToString("N0", Formato.Cultura)</td><td class="tabla-celda font-code-sm text-center">@c.CantidadEventos</td>
+                        <td class="tabla-celda"><partial name="_EstadoBadge" model="@(c.Activo ? "Activo" : "Inactivo")" /></td>
+                        <td class="tabla-celda"><div class="flex justify-end gap-1">
+                            <a asp-page="Detalle" asp-route-id="@c.LocacionId" class="btn-suave h-8 px-2" title="Detalle"><span class="material-symbols-outlined text-[18px]">visibility</span></a>
+                            <a asp-page="Editar" asp-route-id="@c.LocacionId" class="btn-suave h-8 px-2" title="Editar"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+                            <a asp-page="Eliminar" asp-route-id="@c.LocacionId" class="btn-suave h-8 px-2 text-error" title="Eliminar"><span class="material-symbols-outlined text-[18px]">delete</span></a>
+                        </div></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

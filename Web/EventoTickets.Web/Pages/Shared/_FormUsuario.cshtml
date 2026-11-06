@@ -1,0 +1,32 @@
+@model UsuarioBase
+@* Vista parcial anidada: datos personales comunes a Crear y Editar usuario (se usa con for="Entrada") *@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="flex flex-col gap-1.5 md:col-span-2">
+        <label asp-for="NombreCompleto" class="campo-label">Nombre completo *</label>
+        <input asp-for="NombreCompleto" class="campo-input" />
+        <span asp-validation-for="NombreCompleto"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="CorreoElectronico" class="campo-label">Correo electrónico *</label>
+        <input asp-for="CorreoElectronico" class="campo-input" />
+        <span asp-validation-for="CorreoElectronico"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="Telefono" class="campo-label">Teléfono</label>
+        <input asp-for="Telefono" class="campo-input" placeholder="+506 8888-8888" />
+        <span asp-validation-for="Telefono"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="TipoDocumento" class="campo-label">Tipo de documento *</label>
+        <select asp-for="TipoDocumento" class="campo-input">
+            <option value="@TiposDocumento.Cedula">Cédula</option>
+            <option value="@TiposDocumento.Dimex">DIMEX</option>
+            <option value="@TiposDocumento.Pasaporte">Pasaporte</option>
+        </select>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="NumeroDocumento" class="campo-label">Número de documento *</label>
+        <input asp-for="NumeroDocumento" class="campo-input font-code-sm" placeholder="0-0000-0000" />
+        <span asp-validation-for="NumeroDocumento"></span>
+    </div>
+</div>
