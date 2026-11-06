@@ -1,0 +1,6 @@
+@model string
+@* Vista parcial: badge de estado. ViewData["Etiqueta"] permite sobrescribir el texto. *@
+<span class="badge @Formato.ClaseEstado(Model)">
+    <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+    @(ViewData["Etiqueta"] as string ?? Formato.EtiquetaEstado(Model))
+</span>

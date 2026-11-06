@@ -1,0 +1,11 @@
+@page
+@model EventoTickets.Web.Pages.ErrorModel
+@{
+    ViewData["Title"] = Model.Codigo == 404 ? "Página no encontrada" : "Error";
+}
+<section class="tarjeta p-10 text-center space-y-4 max-w-xl mx-auto">
+    <span class="material-symbols-outlined text-[48px] text-secondary">@(Model.Codigo == 404 ? "travel_explore" : "error")</span>
+    <h1 class="font-headline-lg text-headline-lg">@(Model.Codigo == 404 ? "No encontramos lo que buscas" : "Ocurrió un error inesperado")</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">@(Model.Codigo == 404 ? "El evento o la página ya no está disponible." : "Intenta de nuevo en unos minutos.")</p>
+    <a asp-page="/Index" class="btn-primario">Ir al catálogo</a>
+</section>

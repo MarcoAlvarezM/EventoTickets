@@ -1,0 +1,25 @@
+@api = http://localhost:5238
+# 1) Ejecute el login y copie el token en @token
+@token = PEGUE_AQUI_EL_TOKEN
+
+### Login (usuario de prueba)
+POST {{api}}/api/autenticacion/login
+Content-Type: application/json
+
+{ "correoElectronico": "admin@boleteriapro.cr", "password": "Boleteria2026!" }
+
+### Catálogo público
+GET {{api}}/api/eventos?soloVigentes=true
+
+### Tipos de entrada de un evento
+GET {{api}}/api/eventos/1/tipos-entrada
+
+### Cotizar
+POST {{api}}/api/pedidos/cotizacion
+Content-Type: application/json
+
+{ "eventoId": 1, "metodoPago": "SINPE Movil", "lineas": [ { "tipoEntradaId": 3, "cantidad": 2 } ] }
+
+### Panel (personal)
+GET {{api}}/api/reportes/dashboard
+Authorization: Bearer {{token}}

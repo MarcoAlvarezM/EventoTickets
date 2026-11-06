@@ -1,0 +1,92 @@
+@* Layout del portal del comprador (barra superior y pie de página de Stitch) *@
+@{
+    var ruta = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    string Clase(string prefijo) => ruta.StartsWith(prefijo, StringComparison.OrdinalIgnoreCase) ? "enlace-nav-activo" : "enlace-nav";
+    var autenticado = User.Identity?.IsAuthenticated == true;
+    var esPersonal = autenticado && !User.IsInRole(Roles.Comprador);
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <partial name="_Head" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] no-imprimir">
+        <div class="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-8">
+                <a asp-page="/Index" class="flex items-center"><partial name="_Logo" /></a>
+                <nav class="hidden md:flex items-center gap-6" aria-label="Principal">
+                    <a asp-page="/Index" class="@(ruta == "/Index" ? "enlace-nav-activo" : "enlace-nav")">Inicio</a>
+                    <a asp-page="/Index" asp-fragment="catalogo" class="@Clase("/Eventos")">Eventos</a>
+                    @if (autenticado)
+                    {
+                        <a asp-page="/MisPedidos/Index" class="@Clase("/MisPedidos")">Mis Pedidos</a>
+                        <a asp-page="/MisPagos/Index" class="@Clase("/MisPagos")">Mis Pagos</a>
+                        <a asp-page="/MisEntradas/Index" class="@Clase("/MisEntradas")">Mis Entradas</a>
+                    }
+                </nav>
+            </div>
+            <div class="flex items-center gap-2">
+                @if (autenticado)
+                {
+                    @if (esPersonal)
+                    {
+                        <a asp-page="/Admin/Index" class="hidden sm:inline-flex btn-tonal h-9">
+                            <span class="material-symbols-outlined text-[18px]">dashboard</span>Panel
+                        </a>
+                    }
+                    <details class="relative">
+                        <summary class="list-none cursor-pointer flex items-center gap-2 pl-2 hover:opacity-90">
+                            <span class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm">@Formato.Iniciales(User.Identity!.Name ?? "U")</span>
+                            <span class="hidden lg:inline-block font-label-md text-label-md text-on-surface font-medium">Mi Cuenta</span>
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+                        </summary>
+                        <div class="absolute right-0 mt-2 w-60 tarjeta p-2 shadow-lg">
+                            <p class="px-3 py-2 font-label-md text-label-md text-on-surface">@User.Identity!.Name</p>
+                            <a asp-page="/MisPedidos/Index" class="enlace-lateral md:hidden">Mis Pedidos</a>
+                            <a asp-page="/MisPagos/Index" class="enlace-lateral md:hidden">Mis Pagos</a>
+                            <a asp-page="/MisEntradas/Index" class="enlace-lateral md:hidden">Mis Entradas</a>
+                            @if (esPersonal)
+                            {
+                                <a asp-page="/Admin/Index" class="enlace-lateral sm:hidden">Panel administrativo</a>
+                            }
+                            <form method="post" asp-page="/Cuenta/Logout">
+                                <button type="submit" class="enlace-lateral w-full"><span class="material-symbols-outlined text-[20px]">logout</span>Cerrar sesión</button>
+                            </form>
+                        </div>
+                    </details>
+                }
+                else
+                {
+                    <a asp-page="/Cuenta/Login" asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)" class="btn-suave h-9">Iniciar sesión</a>
+                    <a asp-page="/Cuenta/Registro" class="btn-primario h-9 hidden sm:inline-flex">Crear cuenta</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full pt-16 bg-background flex-1">
+        <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 space-y-8">
+            <partial name="_Alertas" />
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="w-full bg-surface-container-lowest shadow-[0_-1px_8px_rgba(0,0,0,0.02)] mt-auto no-imprimir">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-surface-container-high">
+                <partial name="_Logo" />
+                <p class="font-label-md text-label-md text-on-surface-variant text-center">Venta oficial de entradas con validación de pagos y acceso por código QR.</p>
+            </div>
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-body-sm text-body-sm text-on-surface-variant">
+                <span>© @DateTime.Now.Year BoleteríaPro · Proyecto académico SC-701 · Universidad Fidélitas</span>
+                <span>Montos en colones (CRC) · IVA incluido en el total</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/js/sitio.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
