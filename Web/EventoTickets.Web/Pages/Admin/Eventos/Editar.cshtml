@@ -1,0 +1,22 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.Eventos.EditarModel
+@{ ViewData["Title"] = "Editar evento"; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Eventos</a> › <a asp-page="Detalle" asp-route-id="@Model.Id">@Model.Evento.Nombre</a> › Editar</nav>
+<div class="flex items-center gap-3"><h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Editar Evento</h1><partial name="_EstadoBadge" model="Model.Evento.Estado" /></div>
+<form method="post" class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start" novalidate>
+    <div class="xl:col-span-8 space-y-6">
+        <div asp-validation-summary="ModelOnly"></div>
+        <partial name="_FormEvento" for="Entrada" view-data="ViewData" />
+    </div>
+    <aside class="xl:col-span-4 tarjeta p-6 space-y-4 xl:sticky xl:top-24">
+        <h2 class="font-title-sm text-title-sm">Metadatos del registro</h2>
+        <dl class="grid grid-cols-2 gap-3 font-body-sm text-body-sm">
+            <dt class="text-on-surface-variant">Creado</dt><dd>@Formato.FechaHora(Model.Evento.FechaCreacion)</dd>
+            <dt class="text-on-surface-variant">Aforo asignado</dt><dd>@Model.Evento.CapacidadAsignada / @Model.Evento.CapacidadMaxima</dd>
+            <dt class="text-on-surface-variant">Vendidas</dt><dd>@Model.Evento.EntradasVendidas</dd>
+        </dl>
+        <button type="submit" class="btn-acento w-full h-11"><span class="material-symbols-outlined text-[18px]">save</span>Guardar cambios</button>
+        <a asp-page="Detalle" asp-route-id="@Model.Id" class="btn-suave w-full">Cancelar</a>
+    </aside>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

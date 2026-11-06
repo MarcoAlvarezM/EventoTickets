@@ -1,0 +1,133 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Eventos.DetalleModel
+@{ ViewData["Title"] = Model.Evento.Nombre; }
+
+<nav class="flex flex-wrap items-center gap-1.5 font-body-sm text-body-sm text-on-surface-variant" aria-label="Ruta">
+    <a asp-page="/Index" class="hover:text-on-surface">Inicio</a><span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <a asp-page="/Index" asp-route-categoriaId="@Model.Evento.CategoriaId" class="hover:text-on-surface">@Model.Evento.CategoriaNombre</a><span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <span class="text-on-surface font-medium line-clamp-1">@Model.Evento.Nombre</span>
+</nav>
+
+<section class="relative rounded-xl overflow-hidden shadow-sm bg-primary-container min-h-[260px] flex items-end">
+    @if (!string.IsNullOrEmpty(Model.Evento.ImagenUrl))
+    {
+        <img src="@Model.Evento.ImagenUrl" alt="" class="absolute inset-0 w-full h-full object-cover opacity-60" />
+    }
+    <div class="absolute inset-0 bg-gradient-to-t from-primary-container via-primary-container/60 to-transparent"></div>
+    <div class="relative p-6 md:p-10 space-y-4 text-on-primary w-full">
+        <span class="inline-flex px-2.5 py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm uppercase">@Model.Evento.CategoriaNombre</span>
+        <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">@Model.Evento.Nombre</h1>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 font-body-md text-body-md text-inverse-on-surface">
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">calendar_today</span>@Formato.FechaLarga(Model.Evento.FechaEvento)</span>
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">schedule</span>@Formato.Hora(Model.Evento.HoraEvento)</span>
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">location_on</span>@Model.Evento.LocacionNombre, @Model.Evento.Ciudad</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Evento.Organizador))
+        {
+            <p class="font-body-sm text-body-sm text-inverse-primary">Organizado por <strong class="text-on-primary">@Model.Evento.Organizador</strong></p>
+        }
+    </div>
+</section>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-7 space-y-8">
+        <section class="tarjeta p-6 space-y-4">
+            <h2 class="font-headline-md text-headline-md">Acerca del evento</h2>
+            <p class="font-body-lg text-body-lg text-on-surface-variant whitespace-pre-line">@Model.Evento.DescripcionCompleta</p>
+            <div class="grid grid-cols-3 gap-4 pt-2">
+                <div class="rounded-lg bg-surface-container-low p-4 text-center">
+                    <div class="font-headline-lg text-headline-lg">@Model.Tipos.Count</div>
+                    <div class="font-body-sm text-body-sm text-on-surface-variant">Tipos de entrada</div>
+                </div>
+                <div class="rounded-lg bg-surface-container-low p-4 text-center">
+                    <div class="font-headline-lg text-headline-lg">@Model.Evento.EntradasDisponibles.ToString("N0", Formato.Cultura)</div>
+                    <div class="font-body-sm text-body-sm text-on-surface-variant">Disponibles</div>
+                </div>
+                <div class="rounded-lg bg-surface-container-low p-4 text-center">
+                    <div class="font-headline-lg text-headline-lg">@Model.Evento.CapacidadMaxima.ToString("N0", Formato.Cultura)</div>
+                    <div class="font-body-sm text-body-sm text-on-surface-variant">Aforo del recinto</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tarjeta p-6 space-y-4">
+            <h2 class="font-headline-md text-headline-md">Ficha de la locación</h2>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-body-md text-body-md">
+                <div><dt class="font-label-sm text-label-sm text-on-surface-variant uppercase">Recinto</dt><dd class="font-semibold">@Model.Evento.LocacionNombre</dd></div>
+                <div><dt class="font-label-sm text-label-sm text-on-surface-variant uppercase">Dirección</dt><dd>@Model.Evento.Direccion, @Model.Evento.Ciudad</dd></div>
+                <div><dt class="font-label-sm text-label-sm text-on-surface-variant uppercase">Acceso</dt><dd>@(Model.Evento.PabellonPuerta ?? "Indicado en la entrada")</dd></div>
+                <div><dt class="font-label-sm text-label-sm text-on-surface-variant uppercase">Código del evento</dt><dd class="font-code-sm text-code-sm">@Model.Evento.CodigoReferencia</dd></div>
+            </dl>
+        </section>
+
+        <section class="rounded-xl bg-surface-container p-5 flex items-start gap-3">
+            <span class="material-symbols-outlined text-secondary">info</span>
+            <div class="font-body-sm text-body-sm text-on-surface-variant space-y-1">
+                <p class="font-label-md text-label-md text-on-surface">Política de reserva temporal</p>
+                <p>Al continuar, tus entradas quedan reservadas durante unos minutos mientras reportas tu pago por SINPE Móvil, transferencia o depósito. Si la reserva vence, las entradas vuelven a estar disponibles.</p>
+            </div>
+        </section>
+    </div>
+
+    <aside class="lg:col-span-5 lg:sticky lg:top-24">
+        <form method="post" asp-page="/Compras/Resumen" class="tarjeta p-6 space-y-5" novalidate>
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="etiqueta-seccion">Paso 1</p>
+                    <h2 class="font-headline-md text-headline-md">Seleccionar Entradas</h2>
+                </div>
+                @if (Model.DisponibleParaVenta && Model.Evento.EntradasDisponibles > 0)
+                {
+                    <partial name="_EstadoBadge" model="@("Activo")" view-data='new ViewDataDictionary(ViewData) { ["Etiqueta"] = "En venta" }' />
+                }
+                else if (Model.Evento.Estado == EstadosEvento.Agotado)
+                {
+                    <partial name="_EstadoBadge" model="@EstadosEvento.Agotado" />
+                }
+            </div>
+            <input type="hidden" name="Pedido.EventoId" value="@Model.Evento.EventoId" />
+
+            @if (Model.Tipos.Count == 0)
+            {
+                <p class="font-body-md text-body-md text-on-surface-variant">Este evento aún no tiene entradas a la venta.</p>
+            }
+            <div class="space-y-3">
+                @for (var i = 0; i < Model.Tipos.Count; i++)
+                {
+                    var tipo = Model.Tipos[i];
+                    <div class="rounded-lg bg-surface-container-low p-4 flex items-center justify-between gap-4" style="border-left: 4px solid @(tipo.ColorHex ?? "#0051d5")">
+                        <div class="min-w-0">
+                            <p class="font-title-sm text-title-sm truncate">@tipo.Nombre</p>
+                            <p class="font-headline-md text-headline-md text-secondary">@Formato.Moneda(tipo.Precio)</p>
+                            <p class="font-body-sm text-body-sm @(tipo.Disponible > 0 ? "text-on-surface-variant" : "text-error")">
+                                @(tipo.Disponible > 0 ? $"{tipo.Disponible:N0} disponibles" : "Agotado")
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <input type="hidden" name="Pedido.Lineas[@i].TipoEntradaId" value="@tipo.TipoEntradaId" />
+                            <label for="cant-@i" class="sr-only">Cantidad de @tipo.Nombre</label>
+                            <input id="cant-@i" type="number" name="Pedido.Lineas[@i].Cantidad" value="0" min="0" max="@Math.Min(10, tipo.Disponible)"
+                                   class="campo-input w-20 text-center font-code-sm @(tipo.Disponible == 0 || !Model.DisponibleParaVenta ? "opacity-40 pointer-events-none" : "")" @(tipo.Disponible == 0 || !Model.DisponibleParaVenta ? "readonly tabindex=-1 aria-disabled=true" : "") />
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.DisponibleParaVenta && Model.Evento.EntradasDisponibles > 0)
+            {
+                <div class="space-y-1.5">
+                    <label for="metodo" class="campo-label">Método de pago</label>
+                    <select id="metodo" name="Pedido.MetodoPago" class="campo-input">
+                        <option value="@MetodosPago.SinpeMovil">SINPE Móvil</option>
+                        <option value="@MetodosPago.Transferencia">Transferencia bancaria</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primario w-full h-11">Ver resumen del pedido<span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+            }
+            else
+            {
+                <p class="rounded-lg bg-surface-container p-3 font-body-sm text-body-sm text-on-surface-variant">Las entradas de este evento no están disponibles para la venta.</p>
+            }
+        </form>
+    </aside>
+</div>

@@ -1,0 +1,81 @@
+@page "{eventoId:int?}"
+@model EventoTickets.Web.Pages.Admin.TiposEntrada.IndexModel
+@{
+    ViewData["Title"] = "Tipos de entrada";
+    var e = Model.Evento;
+    var vendidas = Model.Tipos.Sum(t => t.CantidadVendida);
+    var reservadas = Model.Tipos.Sum(t => t.CantidadComprometida);
+    var asignado = Model.Tipos.Sum(t => t.CantidadInicial);
+    var recaudo = Model.Tipos.Sum(t => t.CantidadVendida * t.Precio);
+}
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="space-y-1">
+        <span class="etiqueta-seccion">Inventario</span>
+        <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Configuración de Localidades, Aforos y Tipos de Entrada</h1>
+    </div>
+    @if (e is not null && e.Estado is not (EstadosEvento.Cancelado or EstadosEvento.Finalizado))
+    {
+        <a asp-page="Crear" asp-route-eventoId="@e.EventoId" class="btn-acento"><span class="material-symbols-outlined text-[18px]">add_circle</span>Crear nueva localidad</a>
+    }
+</div>
+<form method="get" class="tarjeta p-4 flex flex-col sm:flex-row gap-3 sm:items-end">
+    <div class="flex-1 flex flex-col gap-1.5"><label asp-for="EventoId" class="campo-label">Evento</label>
+        <select asp-for="EventoId" asp-items="Model.Eventos" class="campo-input" onchange="this.form.submit()"></select></div>
+    <noscript><button type="submit" class="btn-tonal">Ver</button></noscript>
+</form>
+
+@if (e is null)
+{
+    <section class="tarjeta p-10 text-center"><p class="font-title-sm text-title-sm">No hay eventos registrados.</p><a asp-page="/Admin/Eventos/Crear" class="btn-primario mt-3">Crear evento</a></section>
+}
+else
+{
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Aforo total habilitado</p><p class="font-headline-lg text-headline-lg">@e.CapacidadMaxima.ToString("N0", Formato.Cultura)</p><p class="campo-ayuda">Capacidad de @e.LocacionNombre</p></div>
+        <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Cupos asignados</p><p class="font-headline-lg text-headline-lg">@asignado.ToString("N0", Formato.Cultura)</p><p class="campo-ayuda">@(e.CapacidadMaxima - asignado) sin asignar</p></div>
+        <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Vendidas / reservadas</p><p class="font-headline-lg text-headline-lg text-secondary">@vendidas / @reservadas</p></div>
+        <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Recaudo bruto (precio × vendidas)</p><p class="font-headline-lg text-headline-lg">@Formato.Moneda(recaudo)</p></div>
+    </div>
+    @if (asignado > 0)
+    {
+        <section class="tarjeta p-5 space-y-3">
+            <h2 class="font-title-sm text-title-sm">Distribución visual del aforo</h2>
+            <div class="flex h-3 rounded-full overflow-hidden bg-surface-container-high">
+                @foreach (var t in Model.Tipos)
+                {
+                    <div style="width:@((100.0 * t.CantidadInicial / e.CapacidadMaxima).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%;background:@(t.ColorHex ?? "#76777d")" title="@t.Nombre: @t.CantidadInicial"></div>
+                }
+            </div>
+            <div class="flex flex-wrap gap-4 font-body-sm text-body-sm text-on-surface-variant">
+                @foreach (var t in Model.Tipos) { <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:@(t.ColorHex ?? "#76777d")"></span>@t.Nombre (@t.CantidadInicial)</span> }
+            </div>
+        </section>
+    }
+    <section class="tarjeta overflow-hidden">
+        <div class="p-5 flex items-center justify-between"><div><h2 class="font-headline-md text-headline-md">Todas las localidades configuradas</h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">@e.Nombre · <partial name="_EstadoBadge" model="e.Estado" /></p></div>
+            <a asp-page="/Admin/Eventos/Detalle" asp-route-id="@e.EventoId" class="font-label-md text-label-md text-secondary hover:underline">Ver evento</a></div>
+        <div class="overflow-x-auto"><table class="w-full text-left">
+            <thead><tr class="tabla-encabezado"><th class="tabla-celda">Localidad / tipo</th><th class="tabla-celda text-right">Precio</th><th class="tabla-celda text-right">Aforo</th><th class="tabla-celda">Progreso de ventas</th><th class="tabla-celda">Estado</th><th class="tabla-celda text-right">Acciones</th></tr></thead>
+            <tbody class="font-body-sm text-body-sm">
+                @if (Model.Tipos.Count == 0) { <tr><td colspan="6" class="tabla-celda text-center text-on-surface-variant">Este evento aún no tiene tipos de entrada.</td></tr> }
+                @foreach (var t in Model.Tipos)
+                {
+                    var pct = (int)(t.PorcentajeVendido ?? 0);
+                    <tr class="hover:bg-surface-container-low">
+                        <td class="tabla-celda"><span class="inline-flex items-center gap-2 font-semibold"><span class="w-3 h-3 rounded-full" style="background:@(t.ColorHex ?? "#76777d")"></span>@t.Nombre</span></td>
+                        <td class="tabla-celda text-right font-code-sm">@Formato.Moneda(t.Precio)</td>
+                        <td class="tabla-celda text-right font-code-sm">@t.CantidadInicial</td>
+                        <td class="tabla-celda min-w-[180px]"><div class="h-1.5 rounded-full bg-surface-container-high overflow-hidden"><div class="h-full bg-secondary" style="width:@pct%"></div></div>
+                            <div class="font-code-sm text-on-surface-variant mt-1">@t.CantidadVendida vendidas · @t.CantidadComprometida reservadas · @t.Disponible libres</div></td>
+                        <td class="tabla-celda"><partial name="_EstadoBadge" model="@(t.Disponible == 0 ? "Agotado" : t.Activo ? "Activo" : "Inactivo")" /></td>
+                        <td class="tabla-celda"><div class="flex justify-end gap-1">
+                            <a asp-page="Detalle" asp-route-id="@t.TipoEntradaId" class="btn-suave h-8 px-2" title="Detalle"><span class="material-symbols-outlined text-[18px]">visibility</span></a>
+                            <a asp-page="Editar" asp-route-id="@t.TipoEntradaId" class="btn-suave h-8 px-2" title="Editar"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+                            <a asp-page="Eliminar" asp-route-id="@t.TipoEntradaId" class="btn-suave h-8 px-2 text-error" title="Eliminar"><span class="material-symbols-outlined text-[18px]">delete</span></a>
+                        </div></td>
+                    </tr>
+                }
+            </tbody></table></div>
+    </section>
+}

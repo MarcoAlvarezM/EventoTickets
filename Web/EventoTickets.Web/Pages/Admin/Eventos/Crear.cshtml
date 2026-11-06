@@ -1,0 +1,22 @@
+@page
+@model EventoTickets.Web.Pages.Admin.Eventos.CrearModel
+@{ ViewData["Title"] = "Crear evento"; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Eventos</a> › Crear</nav>
+<div class="flex items-center gap-3"><h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Crear Nuevo Evento</h1><partial name="_EstadoBadge" model="@EstadosEvento.Borrador" /></div>
+<form method="post" class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start" novalidate>
+    <div class="xl:col-span-8 space-y-6">
+        <div asp-validation-summary="ModelOnly"></div>
+        <partial name="_FormEvento" for="Entrada" view-data="ViewData" />
+    </div>
+    <aside class="xl:col-span-4 tarjeta p-6 space-y-4 xl:sticky xl:top-24">
+        <h2 class="font-title-sm text-title-sm">Requisitos de publicación</h2>
+        <ul class="space-y-2 font-body-sm text-body-sm text-on-surface-variant">
+            <li class="flex gap-2"><span class="material-symbols-outlined text-[18px] text-secondary">check</span>Información general completa</li>
+            <li class="flex gap-2"><span class="material-symbols-outlined text-[18px] text-secondary">check</span>Fecha futura y locación activa</li>
+            <li class="flex gap-2"><span class="material-symbols-outlined text-[18px] text-outline">radio_button_unchecked</span>Al menos un tipo de entrada activo</li>
+        </ul>
+        <button type="submit" class="btn-acento w-full h-11"><span class="material-symbols-outlined text-[18px]">save</span>Guardar borrador</button>
+        <a asp-page="Index" class="btn-suave w-full">Cancelar</a>
+    </aside>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

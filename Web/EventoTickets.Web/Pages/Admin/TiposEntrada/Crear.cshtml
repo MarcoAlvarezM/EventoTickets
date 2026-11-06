@@ -1,0 +1,15 @@
+@page "{eventoId:int}"
+@model EventoTickets.Web.Pages.Admin.TiposEntrada.CrearModel
+@{ ViewData["Title"] = "Nueva localidad"; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index" asp-route-eventoId="@Model.EventoId">Tipos de entrada</a> › Nueva</nav>
+<h1 class="font-headline-lg text-headline-lg">Editor de localidad: nuevo tipo de entrada</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Evento: <strong>@Model.Evento.Nombre</strong> · Aforo disponible para asignar: <strong>@(Model.Evento.CapacidadMaxima - Model.Evento.CapacidadAsignada)</strong></p>
+<form method="post" class="tarjeta p-6 space-y-5 max-w-3xl" novalidate>
+    <div asp-validation-summary="ModelOnly"></div>
+    <partial name="_FormTipoEntrada" for="Entrada" />
+    <div class="flex justify-between gap-3 pt-2">
+        <a asp-page="Index" asp-route-eventoId="@Model.EventoId" class="btn-suave">Descartar</a>
+        <button type="submit" class="btn-acento"><span class="material-symbols-outlined text-[18px]">save</span>Guardar localidad</button>
+    </div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

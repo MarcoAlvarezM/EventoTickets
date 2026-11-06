@@ -1,0 +1,23 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.TiposEntrada.DetalleModel
+@{ ViewData["Title"] = Model.Tipo.Nombre; var t = Model.Tipo; var pct = (int)(t.PorcentajeVendido ?? 0); }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index" asp-route-eventoId="@t.EventoId">Tipos de entrada</a> › @t.Nombre</nav>
+<section class="tarjeta overflow-hidden max-w-4xl">
+    <div class="h-2" style="background:@(t.ColorHex ?? "#76777d")"></div>
+    <div class="p-6 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div><p class="etiqueta-seccion">@t.EventoNombre</p><h1 class="font-headline-lg text-headline-lg">@t.Nombre</h1></div>
+            <div class="flex gap-2"><a asp-page="Editar" asp-route-id="@t.TipoEntradaId" class="btn-tonal">Editar</a><a asp-page="Eliminar" asp-route-id="@t.TipoEntradaId" class="btn-suave text-error">Eliminar</a></div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="rounded-lg bg-surface-container-low p-4"><p class="campo-ayuda uppercase">Precio</p><p class="font-headline-md text-headline-md">@Formato.Moneda(t.Precio)</p></div>
+            <div class="rounded-lg bg-surface-container-low p-4"><p class="campo-ayuda uppercase">Cupo inicial</p><p class="font-headline-md text-headline-md">@t.CantidadInicial</p></div>
+            <div class="rounded-lg bg-surface-container-low p-4"><p class="campo-ayuda uppercase">Comprometido</p><p class="font-headline-md text-headline-md">@t.CantidadComprometida</p></div>
+            <div class="rounded-lg bg-surface-container-low p-4"><p class="campo-ayuda uppercase">Vendido</p><p class="font-headline-md text-headline-md text-secondary">@t.CantidadVendida</p></div>
+            <div class="rounded-lg bg-surface-container-low p-4"><p class="campo-ayuda uppercase">Disponible</p><p class="font-headline-md text-headline-md">@t.Disponible</p></div>
+        </div>
+        <div><div class="h-2 rounded-full bg-surface-container-high overflow-hidden"><div class="h-full bg-secondary" style="width:@pct%"></div></div>
+            <p class="campo-ayuda mt-1">Disponible = Inicial − Comprometido − Vendido · @pct% vendido · <partial name="_EstadoBadge" model="@(t.Activo ? "Activo" : "Inactivo")" /></p></div>
+        <p class="rounded-lg bg-surface-container p-3 font-body-sm text-body-sm text-on-surface-variant">El cupo no puede reducirse por debajo de comprometido + vendido (HU-10). Los pedidos ya creados conservan el precio con que se compraron.</p>
+    </div>
+</section>
