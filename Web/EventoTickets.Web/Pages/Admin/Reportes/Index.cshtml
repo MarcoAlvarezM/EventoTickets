@@ -1,0 +1,42 @@
+@page
+@model EventoTickets.Web.Pages.Admin.Reportes.IndexModel
+@{ ViewData["Title"] = "Reporte de ventas"; }
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="space-y-1">
+        <span class="etiqueta-seccion">Reportes</span>
+        <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Ventas por evento</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Ocupación, pedidos pagados e ingresos (IVA y cargos incluidos) generados en <code>vw_VentasPorEvento</code>.</p>
+    </div>
+    <button type="button" class="btn-tonal no-imprimir" data-imprimir><span class="material-symbols-outlined text-[18px]">print</span>Imprimir / guardar PDF</button>
+</div>
+<form method="get" class="tarjeta p-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-end no-imprimir">
+    <div asp-validation-summary="ModelOnly" class="md:col-span-4"></div>
+    <div class="flex flex-col gap-1.5"><label asp-for="Filtro.FechaDesde" class="campo-label">Desde</label><input asp-for="Filtro.FechaDesde" type="date" class="campo-input" /></div>
+    <div class="flex flex-col gap-1.5"><label asp-for="Filtro.FechaHasta" class="campo-label">Hasta</label><input asp-for="Filtro.FechaHasta" type="date" class="campo-input" /></div>
+    <div class="flex flex-col gap-1.5"><label asp-for="Filtro.CategoriaId" class="campo-label">Categoría</label>
+        <select asp-for="Filtro.CategoriaId" asp-items="Model.Categorias" class="campo-input"><option value="">Todas</option></select></div>
+    <button type="submit" class="btn-primario">Generar</button>
+</form>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Eventos</p><p class="font-headline-lg text-headline-lg">@Model.Ventas.Count</p></div>
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Entradas vendidas</p><p class="font-headline-lg text-headline-lg">@Model.Ventas.Sum(v => v.EntradasVendidas).ToString("N0", Formato.Cultura)</p></div>
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Pedidos pagados</p><p class="font-headline-lg text-headline-lg">@Model.Ventas.Sum(v => v.PedidosPagados)</p></div>
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Ingresos totales</p><p class="font-headline-lg text-headline-lg text-secondary">@Formato.Moneda(Model.Ventas.Sum(v => v.IngresosTotales))</p></div>
+</div>
+<section class="tarjeta overflow-hidden">
+    <div class="overflow-x-auto"><table class="w-full text-left">
+        <thead><tr class="tabla-encabezado"><th class="tabla-celda">Evento</th><th class="tabla-celda">Fecha</th><th class="tabla-celda">Categoría</th><th class="tabla-celda text-right">Aforo</th><th class="tabla-celda text-right">Vendidas</th><th class="tabla-celda text-right">Reservadas</th><th class="tabla-celda text-right">Ocupación</th><th class="tabla-celda text-right">Ingresos</th><th class="tabla-celda">Estado</th></tr></thead>
+        <tbody class="font-body-sm text-body-sm">
+            @if (Model.Ventas.Count == 0) { <tr><td colspan="9" class="tabla-celda text-center text-on-surface-variant">Sin datos para los filtros seleccionados.</td></tr> }
+            @foreach (var v in Model.Ventas)
+            {
+                <tr class="hover:bg-surface-container-low">
+                    <td class="tabla-celda font-semibold">@v.EventoNombre<div class="font-code-sm text-on-surface-variant font-normal">@v.CodigoReferencia · @v.LocacionNombre</div></td>
+                    <td class="tabla-celda whitespace-nowrap">@Formato.Fecha(v.FechaEvento)</td><td class="tabla-celda">@v.CategoriaNombre</td>
+                    <td class="tabla-celda text-right font-code-sm">@v.CapacidadAsignada</td><td class="tabla-celda text-right font-code-sm">@v.EntradasVendidas</td>
+                    <td class="tabla-celda text-right font-code-sm">@v.EntradasComprometidas</td><td class="tabla-celda text-right font-code-sm">@((v.PorcentajeOcupacion ?? 0).ToString("0.#"))%</td>
+                    <td class="tabla-celda text-right font-code-sm font-semibold">@Formato.Moneda(v.IngresosTotales)</td><td class="tabla-celda"><partial name="_EstadoBadge" model="v.Estado" /></td>
+                </tr>
+            }
+        </tbody></table></div>
+</section>

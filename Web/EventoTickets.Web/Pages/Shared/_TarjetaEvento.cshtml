@@ -1,0 +1,69 @@
+@model EventoResponse
+@* Vista parcial: tarjeta del catálogo (Stitch "Catálogo de Eventos") *@
+<article class="flex flex-col bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
+    <div class="relative w-full aspect-[16/9] bg-surface-container overflow-hidden">
+        @if (!string.IsNullOrEmpty(Model.ImagenUrl))
+        {
+            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="@Model.ImagenUrl" alt="@Model.Nombre" loading="lazy" />
+        }
+        else
+        {
+            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-container to-secondary">
+                <span class="material-symbols-outlined text-on-primary text-[48px]">confirmation_number</span>
+            </div>
+        }
+        <div class="absolute top-3 left-3">
+            <span class="px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface font-label-sm text-label-sm font-semibold shadow-sm">@Model.CategoriaNombre</span>
+        </div>
+        <div class="absolute top-3 right-3">
+            @if (Model.EntradasDisponibles > 0 && Model.Estado != EstadosEvento.Agotado)
+            {
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-lowest/95 backdrop-blur-sm text-secondary font-label-sm text-label-sm font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Disponible
+                </span>
+            }
+            else
+            {
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-error"></span>Entradas agotadas
+                </span>
+            }
+        </div>
+    </div>
+    <div class="p-6 flex flex-col flex-1 justify-between gap-6">
+        <div class="space-y-4">
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 text-secondary font-label-sm text-label-sm font-semibold">
+                    <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                    <span>@Formato.Fecha(Model.FechaEvento) • @Formato.Hora(Model.HoraEvento)</span>
+                </div>
+                <h2 class="font-headline-md text-headline-md text-on-surface leading-tight font-semibold line-clamp-2">@Model.Nombre</h2>
+            </div>
+            <div class="space-y-1.5">
+                <div class="flex items-start gap-2 text-on-surface-variant font-body-sm text-body-sm">
+                    <span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5">location_on</span>
+                    <span class="line-clamp-1">@Model.LocacionNombre · @Model.Ciudad</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.DescripcionCorta))
+                {
+                    <div class="flex items-start gap-2 text-on-surface-variant font-body-sm text-body-sm">
+                        <span class="material-symbols-outlined text-[18px] shrink-0">confirmation_number</span>
+                        <span class="line-clamp-2">@Model.DescripcionCorta</span>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="pt-4 bg-surface-container-low/40 -mx-6 -mb-6 p-6 flex items-center justify-between gap-3">
+            <div>
+                <span class="font-body-sm text-body-sm text-on-surface-variant block">@(Model.EntradasDisponibles > 0 ? "Desde" : "Precio final")</span>
+                <span class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">
+                    @(Model.EntradasDisponibles > 0 ? Formato.Moneda(Model.PrecioDesde) : "No disponible")
+                    @if (Model.EntradasDisponibles > 0) { <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">CRC</span> }
+                </span>
+            </div>
+            <a asp-page="/Eventos/Detalle" asp-route-id="@Model.EventoId" class="btn-primario">
+                <span>Ver evento</span><span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+</article>
