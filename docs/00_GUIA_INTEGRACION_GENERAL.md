@@ -119,10 +119,10 @@ Estado de cada fila y nombre de cada prueba: en la matriz de trazabilidad del m�
 
 | Rol | Persona | Responsable de |
 |---|---|---|
-| Integrante 1 · M1 | ~M | HU-01, 02, 03, 07, 08; CRUD de usuarios (con eliminación lógica), categorías y locaciones |
+| Integrante 1 · M1 | Marco Cervantes | HU-01, 02, 03, 07, 08; CRUD de usuarios (con eliminación lógica), categorías y locaciones |
 | Integrante 2 · M2 | Donnkan Cervantes Peraza | HU-04, 05, 06, 09, 10, 11; CRUD de eventos y tipos de entrada; **base de datos general** (creación, 9 tablas, PK/FK, restricciones, índices, funciones, datos iniciales, script maestro, modelo de datos) |
 | Integrante 3 · M3 | Jonathan Umaña | HU-12, 13, 14; CRUD de pedidos (crear, consultar, actualizar método de pago, cancelación lógica); vencimiento de reservas |
-| Integrante 4 · M4 | ~Brodie | HU-15 a HU-19; CRUD de pagos (registrar, consultar, aprobar/rechazar = baja lógica) y de entradas (emitir, consultar, nominar, registrar ingreso) |
+| Integrante 4 · M4 | Brodie Hernandez | HU-15 a HU-19; CRUD de pagos (registrar, consultar, aprobar/rechazar = baja lógica) y de entradas (emitir, consultar, nominar, registrar ingreso) |
 | Integración | Uno de los cuatro, designado por el equipo | Núcleo, `develop`, revisión de PR que tocan el núcleo, verificación conjunta (§15) |
 
 **CRUD por integrante (requisito del enunciado):**
