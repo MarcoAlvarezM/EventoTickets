@@ -1,0 +1,68 @@
+@page
+@model EventoTickets.Web.Pages.Compras.ResumenModel
+@{ ViewData["Title"] = "Resumen de orden"; var c = Model.Cotizacion; }
+<ol class="flex flex-wrap items-center gap-3 font-label-md text-label-md">
+    <li class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>1. Selección de boletos</li>
+    <li class="text-outline">—</li>
+    <li class="flex items-center gap-2 text-secondary font-semibold"><span class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[12px]">2</span>Resumen de orden</li>
+    <li class="text-outline">—</li>
+    <li class="flex items-center gap-2 text-on-surface-variant"><span class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-[12px]">3</span>Pago</li>
+</ol>
+<h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Resumen de orden</h1>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <form method="post" asp-page-handler="Confirmar" class="lg:col-span-8 space-y-6" novalidate>
+        <div asp-validation-summary="All"></div>
+        <input type="hidden" asp-for="Pedido.EventoId" />
+        <input type="hidden" asp-for="Pedido.MetodoPago" />
+        @for (var i = 0; i < Model.Pedido.Lineas.Count; i++)
+        {
+            <input type="hidden" name="Pedido.Lineas[@i].TipoEntradaId" value="@Model.Pedido.Lineas[i].TipoEntradaId" />
+            <input type="hidden" name="Pedido.Lineas[@i].Cantidad" value="@Model.Pedido.Lineas[i].Cantidad" />
+        }
+        <section class="tarjeta p-6 space-y-4">
+            <div class="flex items-center gap-3"><span class="w-10 h-10 rounded-lg bg-surface-container text-secondary flex items-center justify-center"><span class="material-symbols-outlined">receipt_long</span></span>
+                <div><h2 class="font-title-sm text-title-sm">@Model.Evento.Nombre</h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">@Formato.FechaLarga(Model.Evento.FechaEvento) · @Formato.Hora(Model.Evento.HoraEvento) · @Model.Evento.LocacionNombre</p></div></div>
+            @if (c is null)
+            {
+                <p class="font-body-md text-body-md text-on-surface-variant">No fue posible calcular el pedido. Revise la selección.</p>
+            }
+            else
+            {
+                <div class="overflow-x-auto"><table class="w-full text-left">
+                    <thead><tr class="tabla-encabezado"><th class="tabla-celda">Tipo de entrada</th><th class="tabla-celda text-center">Cantidad</th><th class="tabla-celda text-right">Precio unitario</th><th class="tabla-celda text-right">Subtotal</th></tr></thead>
+                    <tbody class="font-body-md text-body-md">
+                        @foreach (var l in c.Lineas)
+                        {
+                            <tr><td class="tabla-celda"><span class="inline-flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:@(l.ColorHex ?? "#0051d5")"></span>@l.Nombre</span></td>
+                                <td class="tabla-celda text-center font-code-sm">@l.Cantidad</td><td class="tabla-celda text-right font-code-sm">@Formato.MonedaExacta(l.PrecioUnitario)</td>
+                                <td class="tabla-celda text-right font-code-sm">@Formato.MonedaExacta(l.SubtotalLinea)</td></tr>
+                        }
+                    </tbody></table></div>
+            }
+        </section>
+        <section class="tarjeta p-6 space-y-3">
+            <h2 class="font-title-sm text-title-sm flex items-center gap-2"><span class="material-symbols-outlined text-secondary">badge</span>Registro de asistentes</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">Las entradas se emiten a nombre del comprador. Después de aprobado el pago, cada entrada puede <strong>nominarse</strong> a otro asistente desde "Mis Entradas" (se genera un QR nuevo).</p>
+            @if (User.Identity?.IsAuthenticated == true) { <p class="font-label-md text-label-md">Titular: @User.Identity.Name</p> }
+        </section>
+        <div class="flex flex-col-reverse sm:flex-row justify-between gap-3">
+            <a asp-page="/Eventos/Detalle" asp-route-id="@Model.Pedido.EventoId" class="btn-suave"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Cambiar selección</a>
+            @if (c is not null)
+            {
+                <button type="submit" class="btn-primario h-12 px-6"><span class="material-symbols-outlined text-[18px]">lock_clock</span>@(User.Identity?.IsAuthenticated == true ? "Confirmar y reservar" : "Iniciar sesión para reservar")</button>
+            }
+        </div>
+    </form>
+    @if (c is not null)
+    {
+        <aside class="lg:col-span-4 tarjeta p-6 space-y-3 font-body-md text-body-md">
+            <h2 class="font-title-sm text-title-sm">Desglose financiero</h2>
+            <div class="flex justify-between"><span>Subtotal (@c.CantidadEntradas entradas)</span><span class="font-code-sm">@Formato.MonedaExacta(c.Subtotal)</span></div>
+            <div class="flex justify-between text-on-surface-variant"><span>Servicio (@c.PorcentajeCargoServicio.ToString("0.##")%)</span><span class="font-code-sm">@Formato.MonedaExacta(c.CargoServicio)</span></div>
+            <div class="flex justify-between text-on-surface-variant"><span>IVA (@c.PorcentajeIVA.ToString("0.##")%)</span><span class="font-code-sm">@Formato.MonedaExacta(c.ImpuestoIVA)</span></div>
+            <div class="flex justify-between items-baseline pt-3 border-t border-outline-variant/40"><span class="font-title-sm text-title-sm">Total</span><span class="font-headline-lg text-headline-lg text-secondary">@Formato.MonedaExacta(c.ImporteTotal)</span></div>
+            <p class="flex items-start gap-2 font-body-sm text-body-sm text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-secondary">timer</span>Al confirmar, las entradas quedan reservadas @c.MinutosReserva minutos mientras reportas el pago (@Model.Pedido.MetodoPago).</p>
+        </aside>
+    }
+</div>

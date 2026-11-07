@@ -1,0 +1,24 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.MisPedidos.EditarModel
+@{ ViewData["Title"] = "Editar pedido"; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Mis Pedidos</a> › <a asp-page="Detalle" asp-route-id="@Model.Id">#@Model.Pedido.CodigoPedido</a> › Editar</nav>
+<form method="post" class="tarjeta p-6 space-y-5 max-w-xl" novalidate>
+    <h1 class="font-headline-lg text-headline-lg">Cambiar método de pago</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">Las entradas, cantidades y precios del pedido no cambian. La reserva vence el @Formato.FechaHora(Model.Pedido.FechaVencimientoReserva).</p>
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        @foreach (var (valor, texto, icono) in new[] { (MetodosPago.SinpeMovil, "SINPE Móvil", "smartphone"), (MetodosPago.Transferencia, "Transferencia bancaria", "account_balance") })
+        {
+            <label class="flex items-center gap-3 rounded-lg p-4 cursor-pointer bg-surface-container-low has-[:checked]:ring-2 has-[:checked]:ring-secondary">
+                <input type="radio" asp-for="Entrada.MetodoPago" value="@valor" class="accent-secondary" />
+                <span class="material-symbols-outlined text-secondary">@icono</span><span class="font-label-md text-label-md">@texto</span>
+            </label>
+        }
+    </div>
+    <span asp-validation-for="Entrada.MetodoPago"></span>
+    <div class="flex justify-between gap-3">
+        <a asp-page="Detalle" asp-route-id="@Model.Id" class="btn-suave">Cancelar</a>
+        <button type="submit" class="btn-acento"><span class="material-symbols-outlined text-[18px]">save</span>Guardar</button>
+    </div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

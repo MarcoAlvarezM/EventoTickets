@@ -1,0 +1,79 @@
+@page "{pedidoId:int}"
+@model EventoTickets.Web.Pages.Compras.CheckoutModel
+@{ ViewData["Title"] = "Checkout"; }
+
+<div class="rounded-xl bg-surface-container px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2" data-contenedor-reserva>
+    <p class="flex items-center gap-2 font-body-md text-body-md text-on-surface"><span class="material-symbols-outlined text-secondary">timer</span>Tus entradas están reservadas temporalmente.</p>
+    <p class="font-code-sm text-code-sm text-secondary font-semibold">TIEMPO RESTANTE: <span data-vence="@Model.Pedido.FechaVencimientoReserva.ToString("yyyy-MM-ddTHH:mm:ss")"></span></p>
+</div>
+
+<ol class="flex flex-wrap items-center gap-3 font-label-md text-label-md">
+    <li class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>1. Selección de boletos</li>
+    <li class="text-outline">—</li>
+    <li class="flex items-center gap-2 text-secondary font-semibold"><span class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[12px]">2</span>Datos y pago</li>
+    <li class="text-outline">—</li>
+    <li class="flex items-center gap-2 text-on-surface-variant"><span class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-[12px]">3</span>Confirmación</li>
+</ol>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-8 space-y-6">
+        <section class="tarjeta p-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary"><span class="material-symbols-outlined">badge</span></span>
+                <div>
+                    <h2 class="font-title-sm text-title-sm">Titular de la compra</h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Las entradas se emiten a nombre del titular; luego puedes transferirlas.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-lg bg-surface-container-low p-4">
+                <div>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Nombre y documento</p>
+                    <p class="font-label-md text-label-md text-on-surface">@Model.Pedido.CompradorNombre</p>
+                    <p class="font-code-sm text-code-sm text-on-surface-variant">@Formato.EtiquetaDocumento(Model.Pedido.CompradorTipoDocumento) @Model.Pedido.CompradorDocumento</p>
+                </div>
+                <div>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Contacto registrado</p>
+                    <p class="font-label-md text-label-md text-on-surface">@Model.Pedido.CompradorCorreo</p>
+                    <p class="font-code-sm text-code-sm text-on-surface-variant">@(Model.Pedido.CompradorTelefono ?? "Sin teléfono")</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="tarjeta p-6 space-y-5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary"><span class="material-symbols-outlined">account_balance</span></span>
+                <div>
+                    <h2 class="font-title-sm text-title-sm">Método de pago: @Model.Pedido.MetodoPagoSeleccionado <a asp-page="/MisPedidos/Editar" asp-route-id="@Model.PedidoId" class="font-label-sm text-label-sm text-secondary hover:underline ml-2">Cambiar</a></h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Realiza el pago a la cuenta oficial e incluye la referencia única en la descripción.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="rounded-lg bg-surface-container-low p-4 space-y-1">
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase">@(Model.Pedido.MetodoPagoSeleccionado == MetodosPago.SinpeMovil ? "Número SINPE Móvil" : "Cuenta IBAN")</p>
+                    <p class="font-headline-md text-headline-md font-code-sm">@(Model.Pedido.MetodoPagoSeleccionado == MetodosPago.SinpeMovil ? Model.Cuenta.SinpeMovil : Model.Cuenta.CuentaIban)</p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">@Model.Cuenta.Titular · @Model.Cuenta.Banco</p>
+                </div>
+                <div class="rounded-lg bg-secondary/10 p-4 space-y-1">
+                    <p class="font-label-sm text-label-sm text-secondary uppercase">Referencia única del pedido</p>
+                    <p class="font-headline-md text-headline-md font-code-sm text-secondary">@Model.Pedido.ReferenciaBancariaUnica</p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Escríbela en el detalle de la transferencia.</p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 justify-between pt-2">
+                <form method="post" asp-page-handler="Cancelar" asp-route-pedidoId="@Model.PedidoId" data-confirmar="¿Cancelar el pedido y liberar las entradas?">
+                    <button type="submit" class="btn-suave"><span class="material-symbols-outlined text-[18px]">cancel</span>Cancelar pedido</button>
+                </form>
+                <a asp-page="/Compras/RegistrarPago" asp-route-pedidoId="@Model.PedidoId" class="btn-primario h-12 px-6">
+                    <span class="material-symbols-outlined text-[18px]">upload_file</span>Ya pagué: reportar comprobante<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </a>
+            </div>
+        </section>
+    </div>
+    <aside class="lg:col-span-4 space-y-4">
+        <partial name="_ResumenPedido" model="Model.Pedido" />
+        <div class="rounded-xl bg-surface-container-low p-4 flex items-start gap-3 font-body-sm text-body-sm text-on-surface-variant">
+            <span class="material-symbols-outlined text-secondary">schedule</span>
+            La reserva vence el @Formato.FechaHora(Model.Pedido.FechaVencimientoReserva). Si no reportas el pago a tiempo, las entradas se liberan automáticamente.
+        </div>
+    </aside>
+</div>

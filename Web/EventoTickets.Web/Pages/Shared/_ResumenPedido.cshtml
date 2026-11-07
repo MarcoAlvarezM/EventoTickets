@@ -1,0 +1,40 @@
+@model PedidoCompletoResponse
+@* Vista parcial: resumen lateral del pedido (Stitch "Checkout" / "Registrar pago") *@
+<section class="tarjeta overflow-hidden">
+    <div class="relative h-28 bg-primary-container">
+        @if (!string.IsNullOrEmpty(Model.EventoImagenUrl))
+        {
+            <img src="@Model.EventoImagenUrl" alt="" class="absolute inset-0 w-full h-full object-cover opacity-60" />
+        }
+        <div class="absolute inset-0 bg-gradient-to-t from-primary-container to-transparent"></div>
+        <div class="absolute bottom-3 left-4 right-4">
+            <span class="font-code-sm text-code-sm text-inverse-primary">#@Model.CodigoPedido</span>
+            <p class="font-title-sm text-title-sm text-on-primary line-clamp-1">@Model.EventoNombre</p>
+        </div>
+    </div>
+    <div class="p-5 space-y-4 font-body-md text-body-md">
+        <div class="space-y-1.5 text-on-surface-variant font-body-sm text-body-sm">
+            <p class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">calendar_today</span>@Formato.FechaLarga(Model.FechaEvento) · @Formato.Hora(Model.HoraEvento)</p>
+            <p class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">location_on</span>@Model.LocacionNombre, @Model.Ciudad</p>
+        </div>
+        <div class="space-y-2">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Detalle de boletos</p>
+            @foreach (var d in Model.Detalles)
+            {
+                <div class="flex justify-between gap-3">
+                    <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:@(d.ColorHex ?? "#0051d5")"></span>@d.Cantidad × @d.TipoEntradaNombre</span>
+                    <span class="font-code-sm">@Formato.Moneda(d.SubtotalLinea)</span>
+                </div>
+            }
+        </div>
+        <div class="space-y-1.5 pt-3 border-t border-outline-variant/40 text-on-surface-variant">
+            <div class="flex justify-between"><span>Subtotal</span><span class="font-code-sm">@Formato.MonedaExacta(Model.Subtotal)</span></div>
+            <div class="flex justify-between"><span>Cargo por servicio</span><span class="font-code-sm">@Formato.MonedaExacta(Model.CargoServicio)</span></div>
+            <div class="flex justify-between"><span>IVA</span><span class="font-code-sm">@Formato.MonedaExacta(Model.ImpuestoIVA)</span></div>
+        </div>
+        <div class="flex justify-between items-baseline">
+            <span class="font-title-sm text-title-sm">Total a pagar</span>
+            <span class="font-headline-lg text-headline-lg text-secondary">@Formato.MonedaExacta(Model.ImporteTotal)</span>
+        </div>
+    </div>
+</section>
