@@ -1,0 +1,60 @@
+@page
+@model EventoTickets.Web.Pages.Admin.Eventos.IndexModel
+@{ ViewData["Title"] = "Eventos"; }
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="space-y-1">
+        <span class="etiqueta-seccion">Programación</span>
+        <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Gestión de Eventos</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Crea, edita, publica o cancela eventos y controla su ocupación.</p>
+    </div>
+    <a asp-page="Crear" class="btn-primario"><span class="material-symbols-outlined text-[18px]">add_circle</span>Crear nuevo evento</a>
+</div>
+<form method="get" class="tarjeta p-4 grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+    <div class="md:col-span-2 flex flex-col gap-1.5"><label asp-for="Filtro.Busqueda" class="campo-label">Buscar</label><input asp-for="Filtro.Busqueda" type="search" class="campo-input" placeholder="Nombre, organizador o código" /></div>
+    <div class="flex flex-col gap-1.5"><label asp-for="Filtro.CategoriaId" class="campo-label">Categoría</label>
+        <select asp-for="Filtro.CategoriaId" asp-items="Model.Categorias" class="campo-input"><option value="">Todas</option></select></div>
+    <div class="flex flex-col gap-1.5"><label asp-for="Filtro.Estado" class="campo-label">Estado</label>
+        <select asp-for="Filtro.Estado" class="campo-input"><option value="">Todos</option>@foreach (var e in EstadosEvento.Todos) { <option value="@e">@e</option> }</select></div>
+    <div class="flex gap-2">
+        <select asp-for="Orden" class="campo-input" aria-label="Ordenar"><option value="fecha">Fecha</option><option value="nombre">Nombre</option><option value="ventas">Más vendidos</option></select>
+        <button type="submit" class="btn-primario">Filtrar</button>
+    </div>
+</form>
+<section class="tarjeta overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead><tr class="tabla-encabezado"><th class="tabla-celda">Evento</th><th class="tabla-celda">Fecha</th><th class="tabla-celda">Locación</th><th class="tabla-celda">Ocupación</th><th class="tabla-celda">Estado</th><th class="tabla-celda text-right">Acciones</th></tr></thead>
+            <tbody class="font-body-sm text-body-sm">
+                @if (Model.Eventos.Count == 0) { <tr><td colspan="6" class="tabla-celda text-center text-on-surface-variant">No hay eventos con esos filtros.</td></tr> }
+                @foreach (var e in Model.Eventos)
+                {
+                    var pct = e.CapacidadAsignada == 0 ? 0 : (int)Math.Round(100.0 * e.EntradasVendidas / e.CapacidadAsignada);
+                    <tr class="hover:bg-surface-container-low">
+                        <td class="tabla-celda"><a asp-page="Detalle" asp-route-id="@e.EventoId" class="font-semibold hover:text-secondary">@e.Nombre</a>
+                            <div class="font-code-sm text-on-surface-variant">@e.CodigoReferencia · @e.CategoriaNombre</div></td>
+                        <td class="tabla-celda whitespace-nowrap">@Formato.Fecha(e.FechaEvento)<div class="text-on-surface-variant">@Formato.Hora(e.HoraEvento)</div></td>
+                        <td class="tabla-celda">@e.LocacionNombre</td>
+                        <td class="tabla-celda min-w-[140px]">
+                            <div class="h-1.5 rounded-full bg-surface-container-high overflow-hidden"><div class="h-full bg-secondary" style="width:@pct%"></div></div>
+                            <div class="text-on-surface-variant mt-1 font-code-sm">@e.EntradasVendidas / @e.CapacidadAsignada</div>
+                        </td>
+                        <td class="tabla-celda"><partial name="_EstadoBadge" model="e.Estado" /></td>
+                        <td class="tabla-celda"><div class="flex justify-end gap-1">
+                            @if (e.Estado == EstadosEvento.Borrador)
+                            {
+                                <form method="post" asp-page-handler="Estado" asp-route-id="@e.EventoId" asp-route-estado="@EstadosEvento.Publicado">
+                                    <button type="submit" class="btn-suave h-8 px-2 text-secondary" title="Publicar"><span class="material-symbols-outlined text-[18px]">publish</span></button></form>
+                            }
+                            <a asp-page="/Admin/TiposEntrada/Index" asp-route-eventoId="@e.EventoId" class="btn-suave h-8 px-2" title="Tipos de entrada"><span class="material-symbols-outlined text-[18px]">local_activity</span></a>
+                            @if (e.Estado is EstadosEvento.Borrador or EstadosEvento.Publicado or EstadosEvento.Agotado)
+                            {
+                                <a asp-page="Editar" asp-route-id="@e.EventoId" class="btn-suave h-8 px-2" title="Editar"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+                            }
+                            <a asp-page="Eliminar" asp-route-id="@e.EventoId" class="btn-suave h-8 px-2 text-error" title="Eliminar o cancelar"><span class="material-symbols-outlined text-[18px]">delete</span></a>
+                        </div></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

@@ -1,0 +1,32 @@
+@* Layout de inicio de sesión y registro (pantallas centradas de Stitch) *@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <partial name="_Head" />
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+    <header class="w-full">
+        <div class="h-16 max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+            <a asp-page="/Index" class="flex items-center gap-1.5 enlace-nav">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>Volver al catálogo
+            </a>
+            <a asp-page="/Index"><partial name="_Logo" /></a>
+            <span class="w-28"></span>
+        </div>
+    </header>
+    <main class="flex-1 flex items-start justify-center px-4 py-8">
+        <div class="w-full max-w-md space-y-4">
+            <partial name="_Alertas" />
+            @RenderBody()
+        </div>
+    </main>
+    <footer class="w-full py-6">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 font-body-sm text-body-sm text-on-surface-variant">
+            <span>© @DateTime.Now.Year BoleteríaPro. Todos los derechos reservados.</span>
+            <span class="flex items-center gap-1.5 font-code-sm text-code-sm"><span class="material-symbols-outlined text-[16px]">lock</span>Contraseñas protegidas con PBKDF2</span>
+        </div>
+    </footer>
+    <script src="~/js/sitio.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

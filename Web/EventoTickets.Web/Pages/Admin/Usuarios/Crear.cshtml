@@ -1,0 +1,42 @@
+@page
+@model EventoTickets.Web.Pages.Admin.Usuarios.CrearModel
+@{ ViewData["Title"] = "Nuevo usuario"; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Usuarios</a> › Nuevo</nav>
+<h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Configuración de Usuario y Control de Acceso</h1>
+<form method="post" class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start" novalidate>
+    <div class="xl:col-span-8 space-y-6">
+        <div asp-validation-summary="ModelOnly"></div>
+        <section class="tarjeta p-6 space-y-5">
+            <h2 class="font-title-sm text-title-sm flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[13px]">1</span>Datos personales y credenciales</h2>
+            <partial name="_FormUsuario" for="Entrada" />
+            <div class="flex flex-col gap-1.5">
+                <label asp-for="Entrada.Password" class="campo-label">Contraseña temporal *</label>
+                <input asp-for="Entrada.Password" class="campo-input" autocomplete="new-password" />
+                <span class="campo-ayuda">8+ caracteres con letra, número y símbolo. Se almacena con hash PBKDF2.</span>
+                <span asp-validation-for="Entrada.Password"></span>
+            </div>
+        </section>
+        <section class="tarjeta p-6 space-y-4">
+            <h2 class="font-title-sm text-title-sm flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-[13px]">2</span>Asignación de rol principal (RBAC)</h2>
+            <partial name="_SelectorRol" model="Model.Entrada.Rol" />
+            <span asp-validation-for="Entrada.Rol"></span>
+        </section>
+    </div>
+    <aside class="xl:col-span-4 space-y-6">
+        <section class="tarjeta p-6 space-y-4">
+            <h2 class="font-title-sm text-title-sm">Estado de la cuenta</h2>
+            <select asp-for="Entrada.Estado" class="campo-input">
+                @foreach (var e in EstadosUsuario.Todos) { <option value="@e">@e</option> }
+            </select>
+            <div class="flex flex-col gap-2 pt-2">
+                <button type="submit" class="btn-acento h-11"><span class="material-symbols-outlined text-[18px]">save</span>Crear usuario</button>
+                <a asp-page="Index" class="btn-suave">Descartar</a>
+            </div>
+        </section>
+        <section class="tarjeta p-6 space-y-3">
+            <h2 class="font-title-sm text-title-sm">Matriz de permisos del rol</h2>
+            <partial name="_MatrizPermisos" model="Model.Entrada.Rol" />
+        </section>
+    </aside>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

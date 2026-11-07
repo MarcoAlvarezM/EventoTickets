@@ -1,0 +1,104 @@
+@page
+@model EventoTickets.Web.Pages.MisPedidos.IndexModel
+@{
+    ViewData["Title"] = "Mis pedidos";
+    var pestanas = new (string Valor, string Texto)[]
+    {
+        ("", "Todos los pedidos"), (EstadosPedido.PendientePago, "Pendiente de pago"), (EstadosPedido.EnValidacion, "En validación"),
+        (EstadosPedido.Pagado, "Pagados / Confirmados"), (EstadosPedido.Cancelado, "Cancelados"), (EstadosPedido.Vencido, "Vencidos")
+    };
+    string Borde(string estado) => estado switch
+    {
+        EstadosPedido.PendientePago => "border-amber-400", EstadosPedido.EnValidacion => "border-secondary",
+        EstadosPedido.Pagado => "border-emerald-600", _ => "border-outline-variant"
+    };
+}
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="space-y-1">
+        <nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="/Index">Inicio</a> › Mis Pedidos</nav>
+        <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Mis Pedidos</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Consulta el historial de tus compras, realiza el seguimiento de la validación de pagos y accede a tus entradas.</p>
+    </div>
+    <a asp-page="/Index" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">travel_explore</span>Explorar más eventos</a>
+</section>
+
+<div class="flex flex-wrap gap-2">
+    @foreach (var (valor, texto) in pestanas)
+    {
+        var activo = (Model.Estado ?? "") == valor;
+        <a asp-page="/MisPedidos/Index" asp-route-estado="@valor"
+           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-label-md text-label-md @(activo ? "bg-primary text-on-primary" : "bg-surface-container-lowest shadow-sm text-on-surface-variant hover:text-on-surface")">
+            @texto <span class="font-code-sm text-code-sm @(activo ? "text-inverse-primary" : "text-on-surface-variant")">@Model.Conteo.GetValueOrDefault(valor)</span>
+        </a>
+    }
+</div>
+
+<form method="get" class="tarjeta p-3 flex items-center gap-3">
+    <input type="hidden" asp-for="Estado" />
+    <span class="material-symbols-outlined text-on-surface-variant ml-2">search</span>
+    <input asp-for="Busqueda" type="search" class="campo-input bg-transparent" placeholder="Buscar por número de pedido o nombre del evento..." />
+    <button type="submit" class="btn-tonal h-9">Buscar</button>
+</form>
+
+@if (Model.Pedidos.Count == 0)
+{
+    <section class="tarjeta p-10 text-center space-y-3">
+        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">shopping_bag</span>
+        <p class="font-title-sm text-title-sm">No hay pedidos en esta vista.</p>
+        <a asp-page="/Index" class="btn-primario">Ir al catálogo</a>
+    </section>
+}
+<div class="space-y-4">
+    @foreach (var p in Model.Pedidos)
+    {
+        <article class="tarjeta overflow-hidden border-t-4 @Borde(p.Estado)">
+            <div class="px-5 py-3 flex flex-wrap items-center justify-between gap-2 bg-surface-container-low/50">
+                <span class="font-code-sm text-code-sm text-on-surface-variant">#@p.CodigoPedido · @Formato.FechaHora(p.FechaCreacion)</span>
+                <partial name="_EstadoBadge" model="p.Estado" />
+            </div>
+            <div class="p-5 flex flex-col md:flex-row gap-5 md:items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-24 h-16 rounded-lg overflow-hidden bg-surface-container shrink-0">
+                        @if (!string.IsNullOrEmpty(p.EventoImagenUrl)) { <img src="@p.EventoImagenUrl" alt="" class="w-full h-full object-cover" /> }
+                    </div>
+                    <div>
+                        <p class="font-title-sm text-title-sm">@p.EventoNombre</p>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant">@Formato.Fecha(p.FechaEvento) · @p.LocacionNombre</p>
+                        <p class="font-body-sm text-body-sm text-secondary">@p.CantidadEntradas entrada(s) · @p.MetodoPagoSeleccionado</p>
+                    </div>
+                </div>
+                <div class="text-left md:text-right">
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Total del pedido</p>
+                    <p class="font-headline-md text-headline-md">@Formato.Moneda(p.ImporteTotal) <span class="font-body-sm text-body-sm text-on-surface-variant">CRC</span></p>
+                </div>
+            </div>
+            @if (p.Estado == EstadosPedido.PendientePago)
+            {
+                <div class="mx-5 mb-3 rounded-lg bg-amber-50 px-4 py-2 font-body-sm text-body-sm text-amber-900 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">timer</span>Reserva activa hasta el @Formato.FechaHora(p.FechaVencimientoReserva)
+                    @if (p.EstadoUltimoPago == EstadosPago.Rechazado) { <span class="font-semibold">· Tu último comprobante fue rechazado</span> }
+                </div>
+            }
+            <div class="px-5 pb-5 flex flex-wrap items-center justify-end gap-2">
+                @if (p.Estado == EstadosPedido.PendientePago)
+                {
+                    <form method="post" asp-page-handler="Cancelar" asp-route-id="@p.PedidoId" asp-route-estado="@Model.Estado" data-confirmar="¿Cancelar este pedido?">
+                        <button type="submit" class="btn-suave h-9 text-error"><span class="material-symbols-outlined text-[16px]">cancel</span>Cancelar pedido</button>
+                    </form>
+                    <a asp-page="/MisPedidos/Detalle" asp-route-id="@p.PedidoId" class="btn-tonal h-9">Ver detalle</a>
+                    <a asp-page="/MisPedidos/Editar" asp-route-id="@p.PedidoId" class="btn-suave h-9" title="Cambiar método de pago"><span class="material-symbols-outlined text-[16px]">edit</span></a>
+                    <a asp-page="/Compras/RegistrarPago" asp-route-pedidoId="@p.PedidoId" class="btn-acento h-9"><span class="material-symbols-outlined text-[16px]">upload_file</span>Registrar pago</a>
+                }
+                else if (p.Estado == EstadosPedido.Pagado)
+                {
+                    <a asp-page="/MisPedidos/Detalle" asp-route-id="@p.PedidoId" class="btn-tonal h-9">Detalle</a>
+                    <a asp-page="/MisEntradas/Index" class="btn-primario h-9"><span class="material-symbols-outlined text-[16px]">qr_code_2</span>Ver entradas digitales</a>
+                }
+                else
+                {
+                    <a asp-page="/MisPedidos/Detalle" asp-route-id="@p.PedidoId" class="btn-tonal h-9">Ver detalle del pedido</a>
+                }
+            </div>
+        </article>
+    }
+</div>

@@ -1,0 +1,27 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.Pedidos.DetalleModel
+@{ ViewData["Title"] = $"Pedido {Model.Pedido.CodigoPedido}"; var p = Model.Pedido; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Pedidos</a> › #@p.CodigoPedido</nav>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3"><h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Pedido #@p.CodigoPedido</h1><partial name="_EstadoBadge" model="p.Estado" /></div>
+    @if (p.Estado == EstadosPedido.PendientePago)
+    {
+        <form method="post" asp-page-handler="Cancelar" asp-route-id="@p.PedidoId" data-confirmar="¿Cancelar el pedido y liberar sus entradas?">
+            <button type="submit" class="btn-peligro"><span class="material-symbols-outlined text-[18px]">cancel</span>Cancelar pedido</button></form>
+    }
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-8 space-y-6">
+        <section class="tarjeta p-6 grid grid-cols-1 sm:grid-cols-2 gap-5 font-body-md text-body-md">
+            <div><p class="campo-ayuda uppercase">Comprador</p><p class="font-semibold">@p.CompradorNombre</p><p class="text-on-surface-variant">@p.CompradorCorreo · @(p.CompradorTelefono ?? "sin teléfono")</p>
+                <p class="font-code-sm text-on-surface-variant">@Formato.EtiquetaDocumento(p.CompradorTipoDocumento) @p.CompradorDocumento</p></div>
+            <div><p class="campo-ayuda uppercase">Pago</p><p>@p.MetodoPagoSeleccionado</p><p class="font-code-sm text-secondary">Ref. @p.ReferenciaBancariaUnica</p>
+                <p class="text-on-surface-variant">Creado @Formato.FechaHora(p.FechaCreacion) · Vence @Formato.FechaHora(p.FechaVencimientoReserva)</p></div>
+        </section>
+        <section class="tarjeta p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div><h2 class="font-title-sm text-title-sm">Pagos asociados</h2><p class="font-body-sm text-body-sm text-on-surface-variant">Intentos de pago y su auditoría (Módulo 4).</p></div>
+            <a asp-page="/Admin/Pagos/Index" asp-route-pedidoId="@p.PedidoId" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">verified</span>Ver pagos del pedido</a>
+        </section>
+    </div>
+    <aside class="lg:col-span-4"><partial name="_ResumenPedido" model="Model.Pedido" /></aside>
+</div>

@@ -1,0 +1,81 @@
+@page
+@model EventoTickets.Web.Pages.Cuenta.RegistroModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+    Layout = "_AuthLayout";
+}
+<section class="tarjeta p-6 sm:p-8 space-y-6">
+    <div class="space-y-2">
+        <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm">
+            <span class="material-symbols-outlined text-[16px]">how_to_reg</span>Registro oficial de compradores
+        </span>
+        <h1 class="font-headline-xl text-headline-xl-mobile sm:text-headline-xl text-on-surface tracking-tight">Crear Cuenta</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Regístrate para reservar entradas, subir comprobantes de pago y recibir tus accesos QR.</p>
+    </div>
+    <form method="post" class="flex flex-col gap-5" novalidate>
+        <div asp-validation-summary="ModelOnly"></div>
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Entrada.NombreCompleto" class="campo-label">Nombre completo *</label>
+            <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">person</span>
+                <input asp-for="Entrada.NombreCompleto" class="campo-input pl-10" placeholder="Ej. Mariana Gómez Restrepo" autocomplete="name" />
+            </div>
+            <span class="campo-ayuda">Tal como figura en tu documento oficial para ingresar al recinto.</span>
+            <span asp-validation-for="Entrada.NombreCompleto"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Entrada.CorreoElectronico" class="campo-label">Correo electrónico *</label>
+            <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">mail</span>
+                <input asp-for="Entrada.CorreoElectronico" class="campo-input pl-10" placeholder="tu.correo@ejemplo.com" autocomplete="email" />
+            </div>
+            <span asp-validation-for="Entrada.CorreoElectronico"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <span class="campo-label">Documento de identidad *</span>
+            <div class="grid grid-cols-[8.5rem_1fr] gap-2">
+                <select asp-for="Entrada.TipoDocumento" class="campo-input">
+                    <option value="@TiposDocumento.Cedula">Cédula</option>
+                    <option value="@TiposDocumento.Dimex">DIMEX</option>
+                    <option value="@TiposDocumento.Pasaporte">Pasaporte</option>
+                </select>
+                <input asp-for="Entrada.NumeroDocumento" class="campo-input" placeholder="0-0000-0000" />
+            </div>
+            <span class="campo-ayuda">Se usa para la emisión nominativa de tus entradas.</span>
+            <span asp-validation-for="Entrada.NumeroDocumento"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Entrada.Telefono" class="campo-label">Teléfono</label>
+            <input asp-for="Entrada.Telefono" class="campo-input" placeholder="+506 8888-8888" autocomplete="tel" />
+            <span asp-validation-for="Entrada.Telefono"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Entrada.Password" class="campo-label">Contraseña *</label>
+            <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">lock</span>
+                <input asp-for="Entrada.Password" id="clave" class="campo-input pl-10 pr-11" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+                <button type="button" class="absolute right-2.5 p-1 text-on-surface-variant" data-alternar-clave="clave" aria-label="Ver u ocultar contraseña"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+            </div>
+            <span class="campo-ayuda">8+ caracteres, al menos una letra, un número y un símbolo.</span>
+            <span asp-validation-for="Entrada.Password"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Entrada.ConfirmarPassword" class="campo-label">Confirmar contraseña *</label>
+            <input asp-for="Entrada.ConfirmarPassword" class="campo-input" placeholder="Repite tu contraseña" autocomplete="new-password" />
+            <span asp-validation-for="Entrada.ConfirmarPassword"></span>
+        </div>
+        <label class="flex items-start gap-2.5 cursor-pointer select-none">
+            <input asp-for="Entrada.AceptaTerminos" class="mt-0.5 w-4 h-4 rounded accent-secondary" />
+            <span class="font-body-sm text-body-sm text-on-surface">Acepto los términos del servicio y la política de privacidad de BoleteríaPro. *</span>
+        </label>
+        <span asp-validation-for="Entrada.AceptaTerminos"></span>
+        <button type="submit" class="btn-acento w-full h-12 font-headline-md text-headline-md">
+            <span class="material-symbols-outlined text-[20px]">person_add</span>Crear Cuenta de Comprador
+        </button>
+    </form>
+    <p class="text-center font-body-md text-body-md text-on-surface-variant">
+        ¿Ya tienes una cuenta registrada? <a asp-page="/Cuenta/Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-secondary font-semibold hover:underline">Inicia sesión aquí</a>
+    </p>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

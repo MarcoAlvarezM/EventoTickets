@@ -1,0 +1,36 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.MisPedidos.DetalleModel
+@{ ViewData["Title"] = $"Pedido {Model.Pedido.CodigoPedido}"; var p = Model.Pedido; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Mis Pedidos</a> › #@p.CodigoPedido</nav>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3"><h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Pedido #@p.CodigoPedido</h1><partial name="_EstadoBadge" model="p.Estado" /></div>
+    <div class="flex flex-wrap gap-2">
+        @if (p.Estado == EstadosPedido.PendientePago)
+        {
+            <a asp-page="/Compras/RegistrarPago" asp-route-pedidoId="@p.PedidoId" class="btn-acento"><span class="material-symbols-outlined text-[18px]">upload_file</span>Registrar pago</a>
+            <a asp-page="Editar" asp-route-id="@p.PedidoId" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">edit</span>Cambiar método de pago</a>
+            <form method="post" asp-page-handler="Cancelar" asp-route-id="@p.PedidoId" data-confirmar="¿Cancelar el pedido y liberar las entradas reservadas?">
+                <button type="submit" class="btn-suave text-error"><span class="material-symbols-outlined text-[18px]">cancel</span>Cancelar pedido</button></form>
+        }
+        <a asp-page="/Compras/Confirmacion" asp-route-pedidoId="@p.PedidoId" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">receipt_long</span>Pagos y entradas</a>
+    </div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <section class="lg:col-span-8 tarjeta p-6 space-y-5">
+        <dl class="grid grid-cols-2 md:grid-cols-3 gap-5 font-body-md text-body-md">
+            <div><dt class="campo-ayuda uppercase">Referencia bancaria</dt><dd class="font-code-sm text-secondary">@p.ReferenciaBancariaUnica</dd></div>
+            <div><dt class="campo-ayuda uppercase">Método de pago</dt><dd>@p.MetodoPagoSeleccionado</dd></div>
+            <div><dt class="campo-ayuda uppercase">Creado</dt><dd>@Formato.FechaHora(p.FechaCreacion)</dd></div>
+            <div><dt class="campo-ayuda uppercase">Reserva vence</dt><dd>@Formato.FechaHora(p.FechaVencimientoReserva)</dd></div>
+            <div><dt class="campo-ayuda uppercase">Entradas</dt><dd>@p.CantidadEntradas</dd></div>
+            <div><dt class="campo-ayuda uppercase">Último pago</dt><dd>@Formato.EtiquetaEstado(p.EstadoUltimoPago)</dd></div>
+        </dl>
+        @if (p.Estado == EstadosPedido.PendientePago)
+        {
+            <div class="rounded-lg bg-amber-50 p-3 font-body-sm text-body-sm text-amber-900 flex items-center gap-2" data-contenedor-reserva>
+                <span class="material-symbols-outlined text-[18px]">timer</span>Tiempo restante de la reserva: <strong data-vence="@p.FechaVencimientoReserva.ToString("yyyy-MM-ddTHH:mm:ss")"></strong></div>
+        }
+        <p class="campo-ayuda">Los precios unitarios quedaron congelados al crear el pedido (PedidoDetalles).</p>
+    </section>
+    <aside class="lg:col-span-4"><partial name="_ResumenPedido" model="Model.Pedido" /></aside>
+</div>

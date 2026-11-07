@@ -1,0 +1,63 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.Eventos.DetalleModel
+@{
+    ViewData["Title"] = Model.Evento.Nombre;
+    var e = Model.Evento;
+    var transiciones = e.Estado switch
+    {
+        EstadosEvento.Borrador => new[] { (EstadosEvento.Publicado, "Publicar", "publish", "btn-acento"), (EstadosEvento.Cancelado, "Cancelar evento", "event_busy", "btn-peligro") },
+        EstadosEvento.Publicado => new[] { (EstadosEvento.Borrador, "Pasar a borrador", "edit_note", "btn-tonal"), (EstadosEvento.Finalizado, "Finalizar", "flag", "btn-tonal"), (EstadosEvento.Cancelado, "Cancelar evento", "event_busy", "btn-peligro") },
+        EstadosEvento.Agotado => new[] { (EstadosEvento.Finalizado, "Finalizar", "flag", "btn-tonal"), (EstadosEvento.Cancelado, "Cancelar evento", "event_busy", "btn-peligro") },
+        _ => Array.Empty<(string, string, string, string)>()
+    };
+}
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Eventos</a> › @e.Nombre</nav>
+<section class="tarjeta overflow-hidden">
+    <div class="grid grid-cols-1 md:grid-cols-3">
+        <div class="relative min-h-[180px] bg-primary-container">
+            @if (!string.IsNullOrEmpty(e.ImagenUrl)) { <img src="@e.ImagenUrl" alt="" class="absolute inset-0 w-full h-full object-cover" /> }
+        </div>
+        <div class="md:col-span-2 p-6 space-y-3">
+            <div class="flex flex-wrap items-center gap-2"><partial name="_EstadoBadge" model="e.Estado" /><span class="font-code-sm text-code-sm text-on-surface-variant">@e.CodigoReferencia</span></div>
+            <h1 class="font-headline-lg text-headline-lg">@e.Nombre</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant">@Formato.FechaLarga(e.FechaEvento) · @Formato.Hora(e.HoraEvento) · @e.LocacionNombre (@e.Ciudad) · @e.CategoriaNombre</p>
+            <div class="flex flex-wrap gap-2 pt-2">
+                @if (e.Estado is EstadosEvento.Borrador or EstadosEvento.Publicado or EstadosEvento.Agotado) { <a asp-page="Editar" asp-route-id="@e.EventoId" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">edit</span>Editar</a> }
+                <a asp-page="/Admin/TiposEntrada/Index" asp-route-eventoId="@e.EventoId" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">local_activity</span>Tipos de entrada</a>
+                @foreach (var (estado, texto, icono, clase) in transiciones)
+                {
+                    <form method="post" asp-page-handler="Estado" asp-route-id="@e.EventoId" asp-route-estado="@estado"
+                          data-confirmar="@(estado == EstadosEvento.Cancelado ? "Cancelar el evento anula las reservas pendientes y las entradas emitidas. ¿Continuar?" : $"¿Cambiar el evento a {estado}?")">
+                        <button type="submit" class="@clase"><span class="material-symbols-outlined text-[18px]">@icono</span>@texto</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Aforo locación</p><p class="font-headline-lg text-headline-lg">@e.CapacidadMaxima.ToString("N0", Formato.Cultura)</p></div>
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Aforo asignado</p><p class="font-headline-lg text-headline-lg">@e.CapacidadAsignada.ToString("N0", Formato.Cultura)</p></div>
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Vendidas</p><p class="font-headline-lg text-headline-lg text-secondary">@e.EntradasVendidas.ToString("N0", Formato.Cultura)</p></div>
+    <div class="tarjeta p-5"><p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Disponibles</p><p class="font-headline-lg text-headline-lg">@e.EntradasDisponibles.ToString("N0", Formato.Cultura)</p></div>
+</div>
+<section class="tarjeta overflow-hidden">
+    <div class="p-5"><h2 class="font-headline-md text-headline-md">Tipos de entrada</h2></div>
+    <div class="overflow-x-auto"><table class="w-full text-left">
+        <thead><tr class="tabla-encabezado"><th class="tabla-celda">Tipo</th><th class="tabla-celda text-right">Precio</th><th class="tabla-celda text-right">Inicial</th><th class="tabla-celda text-right">Reservadas</th><th class="tabla-celda text-right">Vendidas</th><th class="tabla-celda text-right">Disponibles</th><th class="tabla-celda">Estado</th></tr></thead>
+        <tbody class="font-body-sm text-body-sm">
+            @if (Model.Tipos.Count == 0) { <tr><td colspan="7" class="tabla-celda text-center text-on-surface-variant">Sin tipos de entrada. <a asp-page="/Admin/TiposEntrada/Crear" asp-route-eventoId="@e.EventoId" class="text-secondary">Agregar uno</a>.</td></tr> }
+            @foreach (var t in Model.Tipos)
+            {
+                <tr><td class="tabla-celda"><span class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:@(t.ColorHex ?? "#76777d")"></span>@t.Nombre</span></td>
+                    <td class="tabla-celda text-right font-code-sm">@Formato.Moneda(t.Precio)</td><td class="tabla-celda text-right font-code-sm">@t.CantidadInicial</td>
+                    <td class="tabla-celda text-right font-code-sm">@t.CantidadComprometida</td><td class="tabla-celda text-right font-code-sm">@t.CantidadVendida</td>
+                    <td class="tabla-celda text-right font-code-sm">@t.Disponible</td><td class="tabla-celda"><partial name="_EstadoBadge" model="@(t.Activo ? "Activo" : "Inactivo")" /></td></tr>
+            }
+        </tbody></table></div>
+</section>
+<section class="tarjeta p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div><h2 class="font-title-sm text-title-sm">Entradas emitidas y control de acceso</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Las entradas QR las emite el Módulo 4 al aprobarse cada pago.</p></div>
+    <a asp-page="/Admin/Entradas/Index" asp-route-eventoId="@e.EventoId" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">confirmation_number</span>Ver entradas del evento</a>
+</section>

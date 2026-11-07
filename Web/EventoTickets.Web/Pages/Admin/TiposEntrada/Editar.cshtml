@@ -1,0 +1,15 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.TiposEntrada.EditarModel
+@{ ViewData["Title"] = "Editar localidad"; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index" asp-route-eventoId="@Model.Tipo.EventoId">Tipos de entrada</a> › Editar</nav>
+<h1 class="font-headline-lg text-headline-lg">Editor de localidad: @Model.Tipo.Nombre</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">@Model.Tipo.EventoNombre · @Model.Tipo.CantidadVendida vendidas · @Model.Tipo.CantidadComprometida reservadas</p>
+<form method="post" class="tarjeta p-6 space-y-5 max-w-3xl" novalidate>
+    <div asp-validation-summary="ModelOnly"></div>
+    <partial name="_FormTipoEntrada" for="Entrada" />
+    <div class="flex justify-between gap-3 pt-2">
+        <a asp-page="Index" asp-route-eventoId="@Model.Tipo.EventoId" class="btn-suave">Descartar cambios</a>
+        <button type="submit" class="btn-acento"><span class="material-symbols-outlined text-[18px]">save</span>Guardar y actualizar localidad</button>
+    </div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

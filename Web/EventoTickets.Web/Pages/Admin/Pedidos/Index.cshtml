@@ -1,0 +1,37 @@
+@page
+@model EventoTickets.Web.Pages.Admin.Pedidos.IndexModel
+@{ ViewData["Title"] = "Pedidos"; }
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4"><div class="space-y-1">
+    <span class="etiqueta-seccion">Ventas</span>
+    <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Pedidos del sistema</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">Seguimiento de reservas, pagos en validación y pedidos confirmados.</p>
+</div>
+<form method="post" asp-page-handler="Liberar" data-confirmar="¿Vencer ahora todas las reservas expiradas y devolver su cupo?">
+    <button type="submit" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">timer_off</span>Liberar reservas vencidas</button></form></div>
+<form method="get" class="tarjeta p-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+    <div class="md:col-span-2 flex flex-col gap-1.5"><label asp-for="Filtro.Busqueda" class="campo-label">Buscar</label>
+        <input asp-for="Filtro.Busqueda" type="search" class="campo-input" placeholder="Código de pedido, comprador o correo" /></div>
+    <div class="flex flex-col gap-1.5"><label asp-for="Filtro.Estado" class="campo-label">Estado</label>
+        <select asp-for="Filtro.Estado" class="campo-input"><option value="">Todos</option>@foreach (var e in EstadosPedido.Todos) { <option value="@e">@Formato.EtiquetaEstado(e)</option> }</select></div>
+    <button type="submit" class="btn-primario">Filtrar</button>
+</form>
+<section class="tarjeta overflow-hidden">
+    <div class="overflow-x-auto"><table class="w-full text-left">
+        <thead><tr class="tabla-encabezado"><th class="tabla-celda"># Pedido</th><th class="tabla-celda">Fecha</th><th class="tabla-celda">Comprador</th><th class="tabla-celda">Evento</th><th class="tabla-celda text-center">Entradas</th><th class="tabla-celda text-right">Total</th><th class="tabla-celda">Estado</th><th class="tabla-celda"></th></tr></thead>
+        <tbody class="font-body-sm text-body-sm">
+            @if (Model.Pedidos.Count == 0) { <tr><td colspan="8" class="tabla-celda text-center text-on-surface-variant">No hay pedidos con esos filtros.</td></tr> }
+            @foreach (var p in Model.Pedidos)
+            {
+                <tr class="hover:bg-surface-container-low">
+                    <td class="tabla-celda font-code-sm font-semibold text-secondary">#@p.CodigoPedido</td>
+                    <td class="tabla-celda text-on-surface-variant whitespace-nowrap">@Formato.FechaHora(p.FechaCreacion)</td>
+                    <td class="tabla-celda">@p.CompradorNombre<div class="text-on-surface-variant">@p.CompradorCorreo</div></td>
+                    <td class="tabla-celda">@p.EventoNombre</td>
+                    <td class="tabla-celda text-center font-code-sm">@p.CantidadEntradas</td>
+                    <td class="tabla-celda text-right font-code-sm">@Formato.Moneda(p.ImporteTotal)</td>
+                    <td class="tabla-celda"><partial name="_EstadoBadge" model="p.Estado" /></td>
+                    <td class="tabla-celda"><a asp-page="Detalle" asp-route-id="@p.PedidoId" class="btn-suave h-8">Detalle</a></td>
+                </tr>
+            }
+        </tbody></table></div>
+</section>

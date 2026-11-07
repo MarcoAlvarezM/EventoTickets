@@ -1,0 +1,14 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.Categorias.EditarModel
+@{ ViewData["Title"] = "Editar categoría"; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="Index">Categorías</a> › Editar</nav>
+<h1 class="font-headline-lg text-headline-lg">Editar categoría: @Model.Entrada.Nombre</h1>
+<form method="post" class="tarjeta p-6 space-y-5 max-w-3xl" novalidate>
+    <div asp-validation-summary="ModelOnly"></div>
+    <partial name="_FormCategoria" for="Entrada" />
+    <div class="flex justify-between gap-3 pt-2">
+        <a asp-page="Index" class="btn-suave">Cancelar</a>
+        <button type="submit" class="btn-acento"><span class="material-symbols-outlined text-[18px]">save</span>Guardar</button>
+    </div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

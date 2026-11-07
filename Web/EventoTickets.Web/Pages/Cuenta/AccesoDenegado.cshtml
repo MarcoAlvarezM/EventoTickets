@@ -1,0 +1,9 @@
+@page
+@model EventoTickets.Web.Pages.Cuenta.AccesoDenegadoModel
+@{ ViewData["Title"] = "Acceso denegado"; }
+<section class="tarjeta p-10 text-center space-y-4 max-w-xl mx-auto">
+    <span class="material-symbols-outlined text-[48px] text-error">block</span>
+    <h1 class="font-headline-lg text-headline-lg">No tienes permisos para esta sección</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">Tu rol no tiene acceso a este módulo. Si crees que es un error, contacta al Superadministrador.</p>
+    <a asp-page="/Index" class="btn-primario">Volver al catálogo</a>
+</section>

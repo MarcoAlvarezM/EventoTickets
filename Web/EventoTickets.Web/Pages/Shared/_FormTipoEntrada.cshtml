@@ -1,0 +1,29 @@
+@model TipoEntradaBase
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="flex flex-col gap-1.5 md:col-span-2">
+        <label asp-for="Nombre" class="campo-label">Nombre público de la localidad / tipo *</label>
+        <input asp-for="Nombre" class="campo-input" placeholder="Ej. VIP Front Stage" />
+        <span asp-validation-for="Nombre"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="Precio" class="campo-label">Precio unitario (CRC) *</label>
+        <div class="relative flex items-center"><span class="absolute left-3 text-on-surface-variant font-code-sm">₡</span>
+            <input asp-for="Precio" type="number" step="0.01" min="0" class="campo-input pl-8 font-code-sm" /></div>
+        <span asp-validation-for="Precio"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="CantidadInicial" class="campo-label">Aforo máximo destinado *</label>
+        <input asp-for="CantidadInicial" type="number" min="1" class="campo-input font-code-sm" />
+        <span class="campo-ayuda">No puede ser menor que lo ya vendido o reservado.</span>
+        <span asp-validation-for="CantidadInicial"></span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label asp-for="ColorHex" class="campo-label">Color del ticket y del mapa</label>
+        <div class="flex items-center gap-2">
+            <input type="color" value="@(Model?.ColorHex ?? "#0051D5")" class="h-10 w-12 rounded-lg bg-surface cursor-pointer" oninput="this.nextElementSibling.value=this.value.toUpperCase()" aria-label="Selector de color" />
+            <input asp-for="ColorHex" class="campo-input font-code-sm uppercase" placeholder="#0051D5" />
+        </div>
+        <span asp-validation-for="ColorHex"></span>
+    </div>
+    <label class="flex items-center gap-2.5 self-end h-10"><input asp-for="Activo" class="w-4 h-4 accent-secondary" /><span class="font-body-md text-body-md">Disponible para la venta</span></label>
+</div>

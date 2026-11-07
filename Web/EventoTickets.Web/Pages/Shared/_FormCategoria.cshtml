@@ -1,0 +1,12 @@
+@model CategoriaRequest
+<div class="flex flex-col gap-1.5">
+    <label asp-for="Nombre" class="campo-label">Nombre *</label>
+    <input asp-for="Nombre" class="campo-input" placeholder="Ej. Conciertos" />
+    <span asp-validation-for="Nombre"></span>
+</div>
+<div class="flex flex-col gap-1.5">
+    <label asp-for="Descripcion" class="campo-label">Descripción</label>
+    <textarea asp-for="Descripcion" rows="3" class="campo-area"></textarea>
+    <span asp-validation-for="Descripcion"></span>
+</div>
+<label class="flex items-center gap-2.5"><input asp-for="Activo" class="w-4 h-4 accent-secondary" /><span class="font-body-md text-body-md">Categoría activa (visible en el catálogo y en la creación de eventos)</span></label>

@@ -1,0 +1,38 @@
+@* Componentes reutilizables construidos con las mismas utilidades de las pantallas Stitch *@
+<style type="text/tailwindcss">
+    @@layer base {
+        html, body { margin: 0; padding: 0; }
+        body { overscroll-behavior: none; }
+    }
+    @@layer components {
+        .tarjeta { @@apply bg-surface-container-lowest rounded-xl shadow-sm; }
+        .campo-label { @@apply font-label-md text-label-md text-on-surface font-medium; }
+        .campo-input { @@apply w-full h-10 px-3 bg-surface rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:bg-surface-container-lowest transition-colors; }
+        .campo-area { @@apply w-full px-3 py-2 bg-surface rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:bg-surface-container-lowest transition-colors; }
+        .campo-ayuda { @@apply font-body-sm text-body-sm text-on-surface-variant; }
+        .btn { @@apply h-10 px-4 rounded-lg font-label-md text-label-md font-medium inline-flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
+        .btn-primario { @@apply btn bg-primary hover:bg-primary-container text-on-primary shadow-sm; }
+        .btn-acento { @@apply btn bg-secondary hover:bg-secondary-container text-on-secondary shadow-sm; }
+        .btn-tonal { @@apply btn bg-surface-container hover:bg-surface-container-high text-on-surface; }
+        .btn-suave { @@apply btn bg-surface hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface; }
+        .btn-peligro { @@apply btn bg-error hover:opacity-90 text-on-error shadow-sm; }
+        .badge { @@apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm whitespace-nowrap; }
+        .etiqueta-seccion { @@apply font-code-sm text-code-sm text-secondary uppercase tracking-wider; }
+        .tabla-encabezado { @@apply bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider; }
+        .tabla-celda { @@apply py-3.5 px-4; }
+        .enlace-nav { @@apply font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors; }
+        .enlace-nav-activo { @@apply font-label-md text-label-md text-secondary font-semibold; }
+        .enlace-lateral { @@apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors; }
+        .enlace-lateral-activo { @@apply flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-container text-secondary font-semibold font-label-md text-label-md; }
+        /* Validación (clases que generan los Tag Helpers) */
+        .input-validation-error { @@apply ring-2 ring-error/40 bg-error-container/30; }
+        .field-validation-error { @@apply font-body-sm text-body-sm text-error; }
+        .validation-summary-errors { @@apply rounded-lg bg-error-container text-on-error-container p-3 font-body-sm text-body-sm; }
+        .validation-summary-errors ul { @@apply list-disc pl-5 space-y-0.5; }
+        .validation-summary-valid { @@apply hidden; }
+    }
+    @@media print {
+        .no-imprimir { display: none !important; }
+        body { background: #fff !important; }
+    }
+</style>

@@ -1,0 +1,28 @@
+@model string
+@* Vista parcial: permisos derivados del rol (RBAC). El modelo ER no tiene tabla de permisos,
+   por lo que la matriz es informativa y la aplica el API con [Authorize(Roles = ...)]. *@
+@{
+    var modulos = new (string Modulo, string[] Roles)[]
+    {
+        ("Panel principal e indicadores", new[] { Roles.Superadministrador, Roles.AdministradorEventos, Roles.AuditorPagos, Roles.ValidadorAcceso }),
+        ("Usuarios y roles", new[] { Roles.Superadministrador }),
+        ("Eventos, categorías, locaciones y tipos de entrada", new[] { Roles.Superadministrador, Roles.AdministradorEventos }),
+        ("Pedidos y reportes de ventas", new[] { Roles.Superadministrador, Roles.AdministradorEventos, Roles.AuditorPagos }),
+        ("Aprobar / rechazar pagos", new[] { Roles.Superadministrador, Roles.AuditorPagos }),
+        ("Control de acceso en puerta", new[] { Roles.Superadministrador, Roles.ValidadorAcceso }),
+        ("Comprar, pagar y transferir entradas", Roles.Todos)
+    };
+}
+<div class="overflow-x-auto">
+    <table class="w-full text-left">
+        <thead><tr class="tabla-encabezado"><th class="tabla-celda">Módulo del sistema</th><th class="tabla-celda text-center">Acceso con el rol «@Formato.EtiquetaRol(Model)»</th></tr></thead>
+        <tbody class="font-body-sm text-body-sm">
+            @foreach (var (modulo, roles) in modulos)
+            {
+                var permitido = roles.Contains(Model);
+                <tr><td class="tabla-celda">@modulo</td>
+                    <td class="tabla-celda text-center"><span class="material-symbols-outlined text-[20px] @(permitido ? "text-secondary" : "text-outline-variant")">@(permitido ? "check_circle" : "block")</span></td></tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>EventoTickets.Abstracciones</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- IFormFile (carga de comprobantes) y tipos de MVC usados por las interfaces de controladores -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

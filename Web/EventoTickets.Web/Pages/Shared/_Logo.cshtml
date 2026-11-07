@@ -1,0 +1,11 @@
+@* ViewData["Subtitulo"] opcional (ej. "Administración") *@
+<span class="flex items-center gap-3">
+    <img src="~/img/logo.svg" alt="" class="h-8 w-8" />
+    <span class="flex flex-col">
+        <span class="font-headline-md text-headline-md text-on-surface tracking-tight leading-tight">Boletería<span class="text-secondary">Pro</span></span>
+        @if (ViewData["Subtitulo"] is string sub)
+        {
+            <span class="font-label-sm text-label-sm text-on-surface-variant leading-none">@sub</span>
+        }
+    </span>
+</span>

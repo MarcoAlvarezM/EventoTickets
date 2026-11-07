@@ -1,0 +1,107 @@
+@page
+@model IndexModel
+@{ ViewData["Title"] = "Catálogo de eventos"; }
+
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4">
+    <div class="space-y-2 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm">
+            <span class="w-2 h-2 rounded-full bg-secondary"></span>Temporada @DateTime.Today.Year
+        </div>
+        <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl text-on-surface tracking-tight">Catálogo de Eventos Disponibles</h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant">Consulta fechas, disponibilidad en tiempo real y reserva tus entradas de forma segura.</p>
+    </div>
+    <div class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest rounded-xl shadow-sm text-on-surface">
+        <span class="material-symbols-outlined text-[18px] text-secondary">verified_user</span>
+        <span class="font-label-md text-label-md font-medium">Boletería oficial</span>
+    </div>
+</section>
+
+<form method="get" id="catalogo" class="w-full tarjeta p-6 space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Busqueda" class="campo-label">Buscar evento</label>
+            <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px] pointer-events-none">search</span>
+                <input asp-for="Busqueda" type="search" class="campo-input pl-10" placeholder="Nombre u organizador..." />
+            </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="CategoriaId" class="campo-label">Categoría</label>
+            <select asp-for="CategoriaId" asp-items="Model.Categorias" class="campo-input">
+                <option value="">Todas las categorías</option>
+            </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Ciudad" class="campo-label">Ciudad</label>
+            <select asp-for="Ciudad" asp-items="Model.Ciudades" class="campo-input">
+                <option value="">Todas las ciudades</option>
+            </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <span class="campo-label">Rango de fechas</span>
+            <div class="grid grid-cols-2 gap-2">
+                <input asp-for="FechaDesde" type="date" class="campo-input" aria-label="Desde" />
+                <input asp-for="FechaHasta" type="date" class="campo-input" aria-label="Hasta" />
+            </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+            <label asp-for="Orden" class="campo-label">Ordenar por</label>
+            <select asp-for="Orden" class="campo-input">
+                <option value="fecha">Fecha más próxima</option>
+                <option value="precio">Precio más bajo</option>
+                <option value="nombre">Nombre (A-Z)</option>
+            </select>
+        </div>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[20px]">filter_list</span>
+            <span class="font-body-md text-body-md text-on-surface font-semibold">@Model.TotalEventos eventos encontrados</span>
+            <span class="text-on-surface-variant font-body-sm text-body-sm">(Mostrando @Model.Eventos.Count en esta página)</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <a asp-page="/Index" class="btn-suave h-9"><span class="material-symbols-outlined text-[16px]">restart_alt</span>Limpiar filtros</a>
+            <button type="submit" class="btn-primario h-9"><span class="material-symbols-outlined text-[16px]">search</span>Aplicar</button>
+        </div>
+    </div>
+</form>
+
+@if (Model.ErrorCarga is not null)
+{
+    <div class="rounded-xl bg-error-container p-4 font-body-md text-body-md text-on-error-container">@Model.ErrorCarga</div>
+}
+else if (Model.Eventos.Count == 0)
+{
+    <section class="tarjeta p-10 text-center space-y-3">
+        <span class="material-symbols-outlined text-[40px] text-on-surface-variant">event_busy</span>
+        <p class="font-title-sm text-title-sm">No hay eventos que coincidan con los filtros.</p>
+        <a asp-page="/Index" class="btn-tonal">Ver todo el catálogo</a>
+    </section>
+}
+else
+{
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var evento in Model.Eventos)
+        {
+            <partial name="_TarjetaEvento" model="evento" />
+        }
+    </section>
+
+    @if (Model.TotalPaginas > 1)
+    {
+        <nav class="flex items-center justify-between tarjeta px-4 py-3" aria-label="Paginación">
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Página @Model.Pagina de @Model.TotalPaginas</span>
+            <div class="flex items-center gap-1">
+                <a asp-page="/Index" asp-all-route-data="@(new Dictionary<string, string> { ["Busqueda"] = Model.Busqueda ?? "", ["CategoriaId"] = Model.CategoriaId?.ToString() ?? "", ["Ciudad"] = Model.Ciudad ?? "", ["FechaDesde"] = Model.FechaDesde?.ToString("yyyy-MM-dd") ?? "", ["FechaHasta"] = Model.FechaHasta?.ToString("yyyy-MM-dd") ?? "", ["Orden"] = Model.Orden, ["Pagina"] = (Model.Pagina - 1).ToString() })"
+                   class="btn-suave h-8 @(Model.Pagina == 1 ? "pointer-events-none opacity-40" : "")">Anterior</a>
+                @for (var i = 1; i <= Model.TotalPaginas; i++)
+                {
+                    <a asp-page="/Index" asp-all-route-data="@(new Dictionary<string, string> { ["Busqueda"] = Model.Busqueda ?? "", ["CategoriaId"] = Model.CategoriaId?.ToString() ?? "", ["Ciudad"] = Model.Ciudad ?? "", ["FechaDesde"] = Model.FechaDesde?.ToString("yyyy-MM-dd") ?? "", ["FechaHasta"] = Model.FechaHasta?.ToString("yyyy-MM-dd") ?? "", ["Orden"] = Model.Orden, ["Pagina"] = i.ToString() })"
+                       class="w-8 h-8 rounded-lg inline-flex items-center justify-center font-label-md text-label-md @(i == Model.Pagina ? "bg-primary text-on-primary" : "hover:bg-surface-container")">@i</a>
+                }
+                <a asp-page="/Index" asp-all-route-data="@(new Dictionary<string, string> { ["Busqueda"] = Model.Busqueda ?? "", ["CategoriaId"] = Model.CategoriaId?.ToString() ?? "", ["Ciudad"] = Model.Ciudad ?? "", ["FechaDesde"] = Model.FechaDesde?.ToString("yyyy-MM-dd") ?? "", ["FechaHasta"] = Model.FechaHasta?.ToString("yyyy-MM-dd") ?? "", ["Orden"] = Model.Orden, ["Pagina"] = (Model.Pagina + 1).ToString() })"
+                   class="btn-suave h-8 @(Model.Pagina == Model.TotalPaginas ? "pointer-events-none opacity-40" : "")">Siguiente</a>
+            </div>
+        </nav>
+    }
+}

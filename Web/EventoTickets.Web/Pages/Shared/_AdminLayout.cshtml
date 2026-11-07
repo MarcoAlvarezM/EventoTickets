@@ -1,0 +1,108 @@
+@* Layout del panel administrativo (barra lateral y cabecera de Stitch). Los módulos se muestran según el rol. *@
+@{
+    var ruta = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    string Clase(string prefijo) => ruta.StartsWith(prefijo, StringComparison.OrdinalIgnoreCase) ? "enlace-lateral-activo" : "enlace-lateral";
+    bool super = User.IsInRole(Roles.Superadministrador);
+    bool gestion = super || User.IsInRole(Roles.AdministradorEventos);
+    bool supervision = gestion || User.IsInRole(Roles.AuditorPagos);
+    bool acceso = super || User.IsInRole(Roles.ValidadorAcceso);
+    var rol = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? string.Empty;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <partial name="_Head" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased">
+    <aside id="menu-lateral" class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform no-imprimir">
+        <div class="flex flex-col flex-1 min-h-0">
+            <div class="h-16 flex items-center justify-between px-6">
+                <a asp-page="/Admin/Index"><partial name="_Logo" view-data='new ViewDataDictionary(ViewData) { ["Subtitulo"] = "Administración" }' /></a>
+                <button type="button" class="lg:hidden p-1 text-on-surface-variant" data-alternar-menu aria-label="Cerrar menú"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="px-4 py-2">
+                <div class="px-3 py-1.5 rounded bg-surface-container text-secondary font-label-sm text-label-sm flex items-center justify-between">
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span>@Formato.EtiquetaRol(rol)</span>
+                </div>
+            </div>
+            <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto" aria-label="Módulos">
+                <a asp-page="/Admin/Index" class="@(ruta == "/Admin/Index" ? "enlace-lateral-activo" : "enlace-lateral")"><span class="material-symbols-outlined text-[20px]">dashboard</span>Panel Principal</a>
+                @if (super)
+                {
+                    <a asp-page="/Admin/Usuarios/Index" class="@Clase("/Admin/Usuarios")"><span class="material-symbols-outlined text-[20px]">group</span>Usuarios</a>
+                }
+                @if (gestion)
+                {
+                    <a asp-page="/Admin/Eventos/Index" class="@Clase("/Admin/Eventos")"><span class="material-symbols-outlined text-[20px]">confirmation_number</span>Eventos</a>
+                    <a asp-page="/Admin/Categorias/Index" class="@Clase("/Admin/Categorias")"><span class="material-symbols-outlined text-[20px]">category</span>Categorías</a>
+                    <a asp-page="/Admin/Locaciones/Index" class="@Clase("/Admin/Locaciones")"><span class="material-symbols-outlined text-[20px]">location_on</span>Locaciones</a>
+                    <a asp-page="/Admin/TiposEntrada/Index" class="@Clase("/Admin/TiposEntrada")"><span class="material-symbols-outlined text-[20px]">local_activity</span>Tipos de Entrada</a>
+                }
+                @if (supervision)
+                {
+                    <a asp-page="/Admin/Pedidos/Index" class="@Clase("/Admin/Pedidos")"><span class="material-symbols-outlined text-[20px]">shopping_bag</span>Pedidos</a>
+                    <a asp-page="/Admin/Pagos/Index" class="@Clase("/Admin/Pagos")"><span class="material-symbols-outlined text-[20px]">verified</span>Pagos y Validación</a>
+                    <a asp-page="/Admin/Reportes/Index" class="@Clase("/Admin/Reportes")"><span class="material-symbols-outlined text-[20px]">bar_chart</span>Reportes</a>
+                }
+                <a asp-page="/Admin/Entradas/Index" class="@Clase("/Admin/Entradas")"><span class="material-symbols-outlined text-[20px]">qr_code_2</span>Entradas emitidas</a>
+                @if (acceso)
+                {
+                    <a asp-page="/Admin/Accesos/Index" class="@Clase("/Admin/Accesos")"><span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>Control de Acceso</a>
+                }
+            </nav>
+        </div>
+        <div class="p-4">
+            <a asp-page="/Index" class="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors">
+                <span class="material-symbols-outlined text-[18px]">open_in_new</span>Salir al Portal
+            </a>
+        </div>
+    </aside>
+
+    <div class="lg:pl-64 flex flex-col min-h-screen">
+        <header class="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-4 lg:px-8 flex items-center justify-between gap-4 no-imprimir">
+            <div class="flex items-center gap-3">
+                <button type="button" class="lg:hidden p-2 rounded-lg hover:bg-surface-container-low" data-alternar-menu aria-label="Abrir menú"><span class="material-symbols-outlined">menu</span></button>
+                @if (supervision)
+                {
+                    <form method="get" asp-page="/Admin/Pedidos/Index" class="hidden sm:flex items-center gap-3 w-80 bg-surface-container-low rounded-lg px-3 py-2 text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[20px]">search</span>
+                        <input name="busqueda" class="bg-transparent border-none text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none w-full" placeholder="Buscar pedido o comprador..." type="search" />
+                    </form>
+                }
+            </div>
+            <div class="flex items-center gap-4">
+                @if (supervision)
+                {
+                    <a asp-page="/Admin/Pagos/Index" asp-route-estado="@EstadosPago.PendienteValidacion" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-secondary font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">pending_actions</span>Validaciones
+                    </a>
+                }
+                <div class="h-6 w-px bg-surface-container-high hidden md:block"></div>
+                <details class="relative">
+                    <summary class="list-none cursor-pointer flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-sm text-label-sm">@Formato.Iniciales(User.Identity?.Name ?? "U")</span>
+                        <span class="hidden sm:flex flex-col text-left">
+                            <span class="font-label-md text-label-md text-on-surface font-semibold leading-tight">@User.Identity?.Name</span>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant leading-none">@Formato.EtiquetaRol(rol)</span>
+                        </span>
+                    </summary>
+                    <div class="absolute right-0 mt-2 w-52 tarjeta p-2 shadow-lg">
+                        <form method="post" asp-page="/Cuenta/Logout">
+                            <button type="submit" class="enlace-lateral w-full"><span class="material-symbols-outlined text-[20px]">logout</span>Cerrar sesión</button>
+                        </form>
+                    </div>
+                </details>
+            </div>
+        </header>
+        <main class="relative pt-16 bg-background flex-1 w-full">
+            <div class="px-4 lg:px-8 py-6 flex flex-col w-full space-y-8">
+                <partial name="_Alertas" />
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+    <script src="~/js/sitio.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
