@@ -1,0 +1,46 @@
+@page
+@model EventoTickets.Web.Pages.MisPagos.IndexModel
+@{ ViewData["Title"] = "Mis pagos"; }
+<section class="space-y-1">
+    <nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="/Index">Inicio</a> › Mis Pagos</nav>
+    <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Mis Pagos</h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">Comprobantes reportados y el resultado de su validación por auditoría.</p>
+</section>
+<section class="tarjeta overflow-hidden">
+    @if (Model.Pagos.Count == 0)
+    {
+        <p class="p-8 text-center font-body-md text-body-md text-on-surface-variant">Todavía no has reportado pagos.</p>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead><tr class="tabla-encabezado">
+                    <th class="tabla-celda">Pago</th><th class="tabla-celda">Pedido / Evento</th><th class="tabla-celda">Banco y referencia</th>
+                    <th class="tabla-celda text-right">Monto</th><th class="tabla-celda">Fecha</th><th class="tabla-celda">Estado</th><th class="tabla-celda text-center">Comprobante</th>
+                </tr></thead>
+                <tbody class="font-body-sm text-body-sm">
+                    @foreach (var p in Model.Pagos)
+                    {
+                        <tr class="hover:bg-surface-container-low align-top">
+                            <td class="tabla-celda font-code-sm text-code-sm font-semibold text-secondary">#@p.CodigoPago</td>
+                            <td class="tabla-celda"><a asp-page="/Compras/Confirmacion" asp-route-pedidoId="@p.PedidoId" class="font-code-sm text-secondary hover:underline">#@p.CodigoPedido</a><div class="text-on-surface-variant">@p.EventoNombre</div></td>
+                            <td class="tabla-celda">@p.BancoOrigen<div class="font-code-sm text-on-surface-variant">@p.ReferenciaComprobante</div></td>
+                            <td class="tabla-celda text-right font-code-sm font-semibold">@Formato.MonedaExacta(p.MontoReportado)</td>
+                            <td class="tabla-celda text-on-surface-variant">@Formato.FechaHora(p.FechaReporte)</td>
+                            <td class="tabla-celda"><partial name="_EstadoBadge" model="p.Estado" />
+                                @if (!string.IsNullOrEmpty(p.MotivoRechazo)) { <div class="text-error mt-1 max-w-xs">@p.MotivoRechazo</div> }
+                                @if (!string.IsNullOrEmpty(p.CodigoAprobacion)) { <div class="font-code-sm text-on-surface-variant mt-1">@p.CodigoAprobacion</div> }</td>
+                            <td class="tabla-celda text-center">
+                                @if (!string.IsNullOrEmpty(p.ComprobanteUrl))
+                                {
+                                    <a asp-page-handler="Comprobante" asp-route-id="@p.PagoId" target="_blank" class="btn-tonal h-8"><span class="material-symbols-outlined text-[16px]">visibility</span>Ver</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
