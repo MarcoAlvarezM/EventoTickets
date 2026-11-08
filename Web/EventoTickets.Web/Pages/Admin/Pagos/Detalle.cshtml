@@ -1,0 +1,109 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.Admin.Pagos.DetalleModel
+@{ ViewData["Title"] = $"Pago {Model.Pago.CodigoPago}"; var p = Model.Pago; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant"><a asp-page="/Admin/Index">Inicio</a> › <a asp-page="Index">Pagos y Validación</a> › #@p.CodigoPago</nav>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="space-y-1">
+        <div class="flex flex-wrap items-center gap-3"><h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Revisión y Validación de Pago</h1>
+            <span class="font-code-sm text-code-sm px-2 py-1 rounded bg-surface-container text-secondary">#@p.CodigoPago</span><partial name="_EstadoBadge" model="p.Estado" /></div>
+        <p class="font-body-md text-body-md text-on-surface-variant">Verificación manual del comprobante para confirmar el pedido y emitir las entradas con código QR.</p>
+    </div>
+    @if (p.Estado == EstadosPago.PendienteValidacion)
+    {
+        <div class="tarjeta px-4 py-2 font-body-sm text-body-sm"><span class="text-on-surface-variant">En espera desde</span> <strong>@Formato.FechaHora(p.FechaReporte)</strong></div>
+    }
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+    <div class="xl:col-span-7 space-y-6">
+        <section class="tarjeta p-6 space-y-4">
+            <div class="flex items-center justify-between"><h2 class="font-title-sm text-title-sm">Datos del pago reportado</h2><span class="badge bg-surface-container text-secondary">@p.BancoOrigen</span></div>
+            <div class="rounded-lg p-3 flex items-center justify-between gap-3 @(p.MontoCoincide ? "bg-secondary/10 text-secondary" : "bg-amber-50 text-amber-900")">
+                <span class="flex items-center gap-2 font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">@(p.MontoCoincide ? "check_circle" : "warning")</span>@(p.MontoCoincide ? "Coincidencia nominal de monto con la orden" : "El monto reportado difiere del total de la orden")</span>
+                <span class="font-code-sm">@Formato.MonedaExacta(p.MontoReportado)</span>
+            </div>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-body-md text-body-md">
+                <div class="rounded-lg bg-surface-container-low p-3"><dt class="campo-ayuda">Referencia declarada</dt><dd class="font-code-sm">@p.ReferenciaComprobante</dd></div>
+                <div class="rounded-lg bg-surface-container-low p-3"><dt class="campo-ayuda">Pedido vinculado</dt><dd><a asp-page="/Admin/Pedidos/Detalle" asp-route-id="@p.PedidoId" class="font-code-sm text-secondary hover:underline">#@p.CodigoPedido</a> · <partial name="_EstadoBadge" model="p.PedidoEstado" /></dd></div>
+                <div class="rounded-lg bg-surface-container-low p-3"><dt class="campo-ayuda">Referencia única esperada</dt><dd class="font-code-sm">@p.ReferenciaBancariaUnica</dd></div>
+                <div class="rounded-lg bg-surface-container-low p-3"><dt class="campo-ayuda">Huella SHA-256 del archivo</dt><dd class="font-code-sm text-[11px] break-all">@p.HashComprobante</dd></div>
+            </dl>
+            <div class="rounded-lg bg-surface-container-low p-4 space-y-1">
+                <p class="campo-ayuda uppercase">Comprador registrado</p>
+                <p class="font-label-md text-label-md">@p.CompradorNombre <span class="font-code-sm text-on-surface-variant">· @p.CompradorDocumento</span></p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">@p.CompradorCorreo · @(p.CompradorTelefono ?? "sin teléfono")</p>
+                @if (!string.IsNullOrEmpty(p.NotaComprador)) { <p class="font-body-sm text-body-sm italic pt-2">“@p.NotaComprador”</p> }
+            </div>
+        </section>
+
+        <section class="tarjeta p-6 space-y-4">
+            <div class="flex items-center justify-between"><h2 class="font-title-sm text-title-sm">Comprobante bancario adjunto</h2>
+                @if (!string.IsNullOrEmpty(p.ComprobanteUrl)) { <a asp-page-handler="Comprobante" asp-route-id="@p.PagoId" target="_blank" class="btn-tonal h-8"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Abrir</a> }</div>
+            @if (string.IsNullOrEmpty(p.ComprobanteUrl))
+            {
+                <p class="font-body-md text-body-md text-on-surface-variant">Este pago no tiene archivo adjunto.</p>
+            }
+            else if (Model.EsImagen)
+            {
+                <img src="@Url.Page("Detalle", "Comprobante", new { id = p.PagoId })" alt="Comprobante de pago" class="w-full max-h-[520px] object-contain rounded-lg bg-surface-container-low" />
+            }
+            else
+            {
+                <iframe src="@Url.Page("Detalle", "Comprobante", new { id = p.PagoId })" class="w-full h-[520px] rounded-lg bg-surface-container-low" title="Comprobante PDF"></iframe>
+            }
+        </section>
+    </div>
+
+    <aside class="xl:col-span-5 space-y-6">
+        <partial name="_ResumenPedido" model="Model.Pedido" />
+
+        @if (p.Estado == EstadosPago.PendienteValidacion && Model.PuedeValidar)
+        {
+            <section class="tarjeta p-6 space-y-5">
+                <div class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary">gavel</span><div><h2 class="font-title-sm text-title-sm">Panel de decisión operativa</h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Acción definitiva sobre el pedido y despacho de tickets</p></div></div>
+                <div asp-validation-summary="ModelOnly"></div>
+                <form method="post" asp-page-handler="Aprobar" asp-route-id="@p.PagoId" class="space-y-3" data-confirmar="Aprobar confirma el pedido y emite las entradas. ¿Continuar?">
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="Aprobacion.CodigoAprobacion" class="campo-label">Código de aprobación / conciliación (opcional)</label>
+                        <input asp-for="Aprobacion.CodigoAprobacion" class="campo-input font-code-sm" placeholder="Se genera automáticamente si se deja vacío" />
+                        <span asp-validation-for="Aprobacion.CodigoAprobacion"></span>
+                    </div>
+                    <button type="submit" class="w-full btn h-11 bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm"><span class="material-symbols-outlined text-[18px]">verified</span>Aprobar pago y emitir entradas</button>
+                </form>
+                <form method="post" asp-page-handler="Rechazar" asp-route-id="@p.PagoId" class="space-y-3 pt-4 border-t border-outline-variant/40">
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="Rechazo.MotivoRechazo" class="campo-label">Motivo del rechazo *</label>
+                        <textarea asp-for="Rechazo.MotivoRechazo" rows="3" class="campo-area" placeholder="Ej. El monto no aparece acreditado en la cuenta oficial."></textarea>
+                        <span asp-validation-for="Rechazo.MotivoRechazo"></span>
+                    </div>
+                    <button type="submit" class="btn-peligro w-full"><span class="material-symbols-outlined text-[18px]">block</span>Rechazar pago</button>
+                </form>
+                <div class="rounded-lg bg-surface-container p-3 font-body-sm text-body-sm text-on-surface-variant">
+                    <p><strong class="text-on-surface">Aprobar:</strong> el pedido pasa a Pagado y se emite una entrada QR por cada unidad.</p>
+                    <p><strong class="text-on-surface">Rechazar:</strong> el pedido vuelve a pendiente con un plazo de gracia para reportar otro comprobante.</p>
+                </div>
+            </section>
+        }
+        else
+        {
+            <section class="tarjeta p-6 space-y-3">
+                <h2 class="font-title-sm text-title-sm">Trazabilidad de auditoría</h2>
+                <ol class="space-y-3 font-body-sm text-body-sm">
+                    <li class="flex gap-3"><span class="material-symbols-outlined text-[18px] text-secondary">upload</span><span>@Formato.FechaHora(p.FechaReporte) · El comprador reportó el pago.</span></li>
+                    @if (p.FechaValidacion.HasValue)
+                    {
+                        <li class="flex gap-3"><span class="material-symbols-outlined text-[18px] @(p.Estado == EstadosPago.Aprobado ? "text-secondary" : "text-error")">@(p.Estado == EstadosPago.Aprobado ? "verified" : "block")</span>
+                            <span>@Formato.FechaHora(p.FechaValidacion.Value) · @p.Estado por @(p.AuditorNombre ?? "auditoría")@(p.CodigoAprobacion is null ? "" : $" ({p.CodigoAprobacion})").
+                            @if (!string.IsNullOrEmpty(p.MotivoRechazo)) { <br /><span class="text-error">@p.MotivoRechazo</span> }</span></li>
+                    }
+                    else
+                    {
+                        <li class="flex gap-3"><span class="material-symbols-outlined text-[18px] text-amber-700">hourglass_top</span><span>En cola de validación. Tu rol puede consultar pero no aprobar.</span></li>
+                    }
+                </ol>
+            </section>
+        }
+    </aside>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

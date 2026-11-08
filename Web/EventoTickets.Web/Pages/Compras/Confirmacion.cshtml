@@ -1,0 +1,144 @@
+@page "{pedidoId:int}"
+@model EventoTickets.Web.Pages.Compras.ConfirmacionModel
+@{
+    ViewData["Title"] = "Estado del pedido";
+    var p = Model.Pedido;
+    var ultimoPago = Model.Pagos.FirstOrDefault();
+}
+
+<ol class="flex flex-wrap items-center gap-3 font-label-md text-label-md">
+    <li class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>1. Boletos</li>
+    <li class="text-outline">—</li>
+    <li class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] @(p.Estado != EstadosPedido.PendientePago ? "text-secondary" : "")">@(p.Estado != EstadosPedido.PendientePago ? "check_circle" : "radio_button_unchecked")</span>2. Pago</li>
+    <li class="text-outline">—</li>
+    <li class="flex items-center gap-2 @(p.Estado == EstadosPedido.Pagado ? "text-secondary font-semibold" : "text-on-surface-variant")"><span class="material-symbols-outlined text-[18px]">@(p.Estado == EstadosPedido.Pagado ? "task_alt" : "pending")</span>3. Confirmación</li>
+</ol>
+
+<section class="tarjeta p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div class="flex items-start gap-4">
+        @switch (p.Estado)
+        {
+            case EstadosPedido.Pagado:
+                <span class="w-14 h-14 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[32px]">verified</span></span>
+                <div class="space-y-1">
+                    <span class="badge bg-secondary/10 text-secondary">Transacción conciliada</span>
+                    <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">¡Pago aprobado y entradas confirmadas!</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Tus credenciales digitales con código QR ya están activas en "Mis Entradas".</p>
+                </div>
+                break;
+            case EstadosPedido.EnValidacion:
+                <span class="w-14 h-14 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[32px]">hourglass_top</span></span>
+                <div class="space-y-1">
+                    <span class="badge bg-amber-100 text-amber-800">En verificación</span>
+                    <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Recibimos tu reporte de pago</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Un auditor está validando el comprobante. Al aprobarse, se emitirán tus entradas.</p>
+                </div>
+                break;
+            case EstadosPedido.PendientePago:
+                <span class="w-14 h-14 rounded-full bg-surface-container text-secondary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[32px]">payments</span></span>
+                <div class="space-y-1">
+                    <partial name="_EstadoBadge" model="p.Estado" />
+                    <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Tu pedido espera el pago</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Reporta tu comprobante antes del @Formato.FechaHora(p.FechaVencimientoReserva).</p>
+                </div>
+                break;
+            default:
+                <span class="w-14 h-14 rounded-full bg-error-container text-on-error-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[32px]">event_busy</span></span>
+                <div class="space-y-1">
+                    <partial name="_EstadoBadge" model="p.Estado" />
+                    <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">Pedido @Formato.EtiquetaEstado(p.Estado).ToLower()</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Las entradas reservadas se liberaron. Puedes realizar una nueva compra desde el catálogo.</p>
+                </div>
+                break;
+        }
+    </div>
+    <div class="flex flex-col gap-2 shrink-0 no-imprimir">
+        @if (p.Estado == EstadosPedido.Pagado)
+        {
+            <a asp-page="/MisEntradas/Index" class="btn-acento h-11"><span class="material-symbols-outlined text-[18px]">qr_code_2</span>Ver mis entradas digitales</a>
+        }
+        else if (p.Estado == EstadosPedido.PendientePago)
+        {
+            <a asp-page="/Compras/RegistrarPago" asp-route-pedidoId="@p.PedidoId" class="btn-acento h-11"><span class="material-symbols-outlined text-[18px]">upload_file</span>Registrar pago</a>
+        }
+        <button type="button" class="btn-tonal" data-imprimir><span class="material-symbols-outlined text-[18px]">print</span>Imprimir resumen</button>
+    </div>
+</section>
+
+<section class="tarjeta p-5 grid grid-cols-2 md:grid-cols-5 gap-4 font-body-sm text-body-sm">
+    <div><p class="text-on-surface-variant">Número de orden</p><p class="font-code-sm text-code-sm text-on-surface">#@p.CodigoPedido</p></div>
+    <div><p class="text-on-surface-variant">Referencia bancaria</p><p class="font-code-sm text-code-sm text-on-surface">@p.ReferenciaBancariaUnica</p></div>
+    <div><p class="text-on-surface-variant">Fecha del pedido</p><p class="text-on-surface">@Formato.FechaHora(p.FechaCreacion)</p></div>
+    <div><p class="text-on-surface-variant">Método de pago</p><p class="text-on-surface">@p.MetodoPagoSeleccionado</p></div>
+    <div><p class="text-on-surface-variant">Total</p><p class="font-title-sm text-title-sm text-secondary">@Formato.MonedaExacta(p.ImporteTotal)</p></div>
+</section>
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-8 space-y-6">
+        @if (Model.Entradas.Count > 0)
+        {
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-headline-md text-headline-md">Pases digitales oficiales (@Model.Entradas.Count)</h2>
+                    <span class="badge bg-secondary/10 text-secondary">Listos para ingreso</span>
+                </div>
+                @foreach (var e in Model.Entradas)
+                {
+                    <article class="tarjeta p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between">
+                        <div class="space-y-2">
+                            <span class="inline-flex px-2 py-0.5 rounded font-label-sm text-label-sm text-on-primary" style="background:@(e.ColorHex ?? "#0b1c30")">@e.TipoEntradaNombre</span>
+                            <p class="font-title-sm text-title-sm">@e.EventoNombre</p>
+                            <div class="grid grid-cols-3 gap-4 font-body-sm text-body-sm">
+                                <div><p class="text-on-surface-variant">Asistente</p><p class="font-medium">@e.NombreAsistente</p><p class="font-code-sm text-on-surface-variant">@e.DocumentoAsistente</p></div>
+                                <div><p class="text-on-surface-variant">Ubicación</p><p class="font-medium">@(e.AsientoAsignado ?? "General")</p></div>
+                                <div><p class="text-on-surface-variant">Acceso</p><p class="font-medium">@(e.PuertaAcceso ?? "Principal")</p></div>
+                            </div>
+                            <p class="font-code-sm text-code-sm text-on-surface-variant">@e.CodigoTicket</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <a asp-page="/MisEntradas/Detalle" asp-route-id="@e.EntradaId" class="p-2 bg-surface-container-lowest rounded-lg shadow-sm block"><img src="@Url.Page("/MisEntradas/Detalle", "Qr", new { id = e.EntradaId })" alt="QR @e.CodigoTicket" width="112" height="112" loading="lazy" /></a>
+                            <partial name="_EstadoBadge" model="e.Estado" />
+                        </div>
+                    </article>
+                }
+            </section>
+        }
+
+        <section class="tarjeta p-6 space-y-4">
+            <h2 class="font-title-sm text-title-sm flex items-center gap-2"><span class="material-symbols-outlined text-secondary">receipt_long</span>Historial de pagos reportados</h2>
+            @if (Model.Pagos.Count == 0)
+            {
+                <p class="font-body-md text-body-md text-on-surface-variant">Aún no has reportado pagos para este pedido.</p>
+            }
+            else
+            {
+                <ul class="space-y-3">
+                    @foreach (var pago in Model.Pagos)
+                    {
+                        <li class="rounded-lg bg-surface-container-low p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <p class="font-label-md text-label-md"><span class="font-code-sm text-secondary">#@pago.CodigoPago</span> · @pago.BancoOrigen · Ref. @pago.ReferenciaComprobante</p>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant">Reportado el @Formato.FechaHora(pago.FechaReporte) por @Formato.MonedaExacta(pago.MontoReportado)</p>
+                                @if (!string.IsNullOrEmpty(pago.MotivoRechazo))
+                                {
+                                    <p class="font-body-sm text-body-sm text-error mt-1">Motivo del rechazo: @pago.MotivoRechazo</p>
+                                }
+                            </div>
+                            <partial name="_EstadoBadge" model="pago.Estado" />
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+    <aside class="lg:col-span-4 space-y-4">
+        <partial name="_ResumenPedido" model="Model.Pedido" />
+        <section class="tarjeta p-5 space-y-3 font-body-sm text-body-sm text-on-surface-variant">
+            <h3 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-secondary">checklist</span>Instrucciones para el día del evento</h3>
+            <p><strong class="text-on-surface">1. Documento de identidad.</strong> Presenta el documento del titular de la entrada.</p>
+            <p><strong class="text-on-surface">2. Código QR.</strong> Muestra el QR desde tu teléfono; si transfieres la entrada se genera un QR nuevo.</p>
+            <p><strong class="text-on-surface">3. Llegada anticipada.</strong> Llega al menos 30 minutos antes del inicio.</p>
+        </section>
+        <a asp-page="/MisPedidos/Index" class="btn-suave w-full no-imprimir"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Ir a Mis Pedidos</a>
+    </aside>
+</div>

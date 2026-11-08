@@ -1,0 +1,50 @@
+@page "{id:int}"
+@model EventoTickets.Web.Pages.MisEntradas.DetalleModel
+@{ ViewData["Title"] = "Boleto " + Model.Entrada.CodigoTicket; var e = Model.Entrada; var valida = e.Estado == EstadosEntrada.Valida; }
+<nav class="font-body-sm text-body-sm text-on-surface-variant print:hidden"><a asp-page="Index">Mis Entradas</a> › @e.CodigoTicket</nav>
+<article class="tarjeta overflow-hidden max-w-3xl mx-auto">
+    <div class="h-2" style="background:@(e.ColorHex ?? "#0051d5")"></div>
+    <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8">
+        <div class="space-y-5">
+            <div class="flex items-center gap-3 flex-wrap"><partial name="_EstadoBadge" model="e.Estado" /><span class="font-label-md text-label-md text-on-surface-variant">@e.TipoEntradaNombre</span></div>
+            <h1 class="font-headline-lg text-headline-lg">@e.EventoNombre</h1>
+            <dl class="grid grid-cols-2 gap-4 font-body-md text-body-md">
+                <div><dt class="campo-ayuda uppercase">Fecha</dt><dd>@Formato.FechaLarga(e.FechaEvento) · @Formato.Hora(e.HoraEvento)</dd></div>
+                <div><dt class="campo-ayuda uppercase">Lugar</dt><dd>@e.LocacionNombre, @e.Ciudad</dd></div>
+                <div><dt class="campo-ayuda uppercase">Titular</dt><dd>@e.NombreAsistente<br /><span class="font-code-sm text-on-surface-variant">@e.DocumentoAsistente</span></dd></div>
+                <div><dt class="campo-ayuda uppercase">Ubicación / puerta</dt><dd>@(e.AsientoAsignado ?? "General") · @(e.PuertaAcceso ?? "Acceso principal")</dd></div>
+                <div><dt class="campo-ayuda uppercase">Pedido</dt><dd class="font-code-sm">#@e.CodigoPedido</dd></div>
+                <div><dt class="campo-ayuda uppercase">Emitida</dt><dd>@Formato.FechaHora(e.FechaEmision)</dd></div>
+            </dl>
+            <div class="rounded-lg bg-surface-container-low p-3"><p class="campo-ayuda uppercase">Código de entrada</p><p class="font-code-sm text-code-sm break-all">@e.CodigoTicket</p></div>
+            @if (e.Estado == EstadosEntrada.Utilizada)
+            {
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Ingreso registrado el @Formato.FechaHoraOpcional(e.FechaHoraIngreso) por @(e.ValidadorNombre ?? "control de acceso").</p>
+            }
+        </div>
+        <div class="flex flex-col items-center gap-3">
+            @if (valida)
+            {
+                <img src="@Url.Page("/MisEntradas/Detalle", "Qr", new { id = e.EntradaId })" alt="Código QR de la entrada" width="220" height="220" class="rounded-xl bg-white p-2 shadow-sm" />
+                <p class="font-code-sm text-code-sm text-on-surface-variant break-all max-w-[220px] text-center">SHA-256 @e.HashCriptografico[..16]…</p>
+            }
+            else
+            {
+                <div class="w-[220px] h-[220px] rounded-xl bg-surface-container flex flex-col items-center justify-center gap-2 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[56px]">qr_code_2</span><span class="font-label-md text-label-md">QR no disponible (@Formato.EtiquetaEstado(e.Estado))</span></div>
+            }
+        </div>
+    </div>
+</article>
+<div class="flex flex-wrap justify-center gap-3 print:hidden">
+    <a asp-page="Index" class="btn-suave"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Volver</a>
+    @if (valida)
+    {
+        <a href="@Url.Page("/MisEntradas/Detalle", "Qr", new { id = e.EntradaId, descargar = true })" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">download</span>Descargar QR (PNG)</a>
+        <button type="button" onclick="window.print()" class="btn-tonal"><span class="material-symbols-outlined text-[18px]">print</span>Imprimir / PDF</button>
+        @if (e.FechaEvento.Date >= DateTime.Today && e.EventoEstado != EstadosEvento.Cancelado)
+        {
+            <a asp-page="Transferir" asp-route-id="@e.EntradaId" class="btn-acento"><span class="material-symbols-outlined text-[18px]">swap_horiz</span>Nominar / transferir</a>
+        }
+    }
+</div>
