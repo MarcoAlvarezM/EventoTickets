@@ -24,6 +24,12 @@ public class ConfirmacionModel : PaginaBase
     public List<PagoResponse> Pagos { get; private set; } = new();
     public List<EntradaResponse> Entradas { get; private set; } = new();
 
+    /// <summary>
+    /// El pedido pertenece al usuario de la sesión. El personal (auditor, administrador) también puede abrir
+    /// esta página, pero "Mis entradas" y "Registrar pago" solo tienen sentido para el comprador.
+    /// </summary>
+    public bool EsPropietario => Pedido.UsuarioId == UsuarioActualId;
+
     public async Task<IActionResult> OnGetAsync()
     {
         var pedido = await _pedidos.ObtenerAsync(PedidoId);
@@ -33,7 +39,7 @@ public class ConfirmacionModel : PaginaBase
         var pagos = await _pagos.ListarPorPedidoAsync(PedidoId);
         Pagos = pagos.Datos ?? new();
 
-        if (Pedido.Estado == Abstracciones.Constantes.EstadosPedido.Pagado)
+        if (Pedido.Estado == Abstracciones.Constantes.EstadosPedido.Pagado && EsPropietario)
         {
             var entradas = await _entradas.ListarMiasAsync();
             Entradas = (entradas.Datos ?? new()).Where(e => e.PedidoId == PedidoId).ToList();

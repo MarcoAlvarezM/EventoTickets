@@ -23,7 +23,14 @@
                 <div class="space-y-1">
                     <span class="badge bg-secondary/10 text-secondary">Transacción conciliada</span>
                     <h1 class="font-headline-xl text-headline-xl-mobile md:text-headline-xl tracking-tight">¡Pago aprobado y entradas confirmadas!</h1>
-                    <p class="font-body-md text-body-md text-on-surface-variant">Tus credenciales digitales con código QR ya están activas en "Mis Entradas".</p>
+                    @if (Model.EsPropietario)
+                    {
+                        <p class="font-body-md text-body-md text-on-surface-variant">Tus credenciales digitales con código QR ya están activas en "Mis Entradas".</p>
+                    }
+                    else
+                    {
+                        <p class="font-body-md text-body-md text-on-surface-variant">Las entradas con código QR se emitieron al comprador y las verá en su sección "Mis Entradas".</p>
+                    }
                 </div>
                 break;
             case EstadosPedido.EnValidacion:
@@ -53,11 +60,11 @@
         }
     </div>
     <div class="flex flex-col gap-2 shrink-0 no-imprimir">
-        @if (p.Estado == EstadosPedido.Pagado)
+        @if (p.Estado == EstadosPedido.Pagado && Model.EsPropietario)
         {
             <a asp-page="/MisEntradas/Index" class="btn-acento h-11"><span class="material-symbols-outlined text-[18px]">qr_code_2</span>Ver mis entradas digitales</a>
         }
-        else if (p.Estado == EstadosPedido.PendientePago)
+        else if (p.Estado == EstadosPedido.PendientePago && Model.EsPropietario)
         {
             <a asp-page="/Compras/RegistrarPago" asp-route-pedidoId="@p.PedidoId" class="btn-acento h-11"><span class="material-symbols-outlined text-[18px]">upload_file</span>Registrar pago</a>
         }
