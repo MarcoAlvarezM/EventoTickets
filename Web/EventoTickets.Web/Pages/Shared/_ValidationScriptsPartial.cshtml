@@ -1,3 +1,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    // [Range(typeof(bool), "true", "true")] en checkboxes: jquery-validate convierte los límites
+    // con Number("true") = NaN y la regla falla siempre. Para checkboxes basta con que esté marcado.
+    (function ($) {
+        var rangoOriginal = $.validator.methods.range;
+        $.validator.methods.range = function (value, element, param) {
+            if (element.type === "checkbox") {
+                return element.checked;
+            }
+            return rangoOriginal.call(this, value, element, param);
+        };
+    })(jQuery);
+</script>
