@@ -2,6 +2,7 @@
    M4 · Pruebas de base de datos (HU-15 a HU-19)
    Ejecutar después de instalar toda la base (00_EJECUTAR_TODO.sql).
    Resultado esperado: todas las filas en 'OK'. No deja cambios.
+   Requiere al menos un usuario 'AuditorPagos' y uno 'ValidadorAcceso' en estado 'Activo'.
    ============================================================================= */
 USE EventCR_BoleteriaPro_DB;
 GO
@@ -127,6 +128,7 @@ BEGIN TRY
     INSERT INTO @Resultados VALUES (N'Solo auditores aprueban pagos', 'FALLA', N'Se aprobó');
 END TRY
 BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
     INSERT INTO @Resultados VALUES (N'Solo auditores aprueban pagos', CASE WHEN ERROR_NUMBER() = 50403 THEN 'OK' ELSE 'FALLA' END, ERROR_MESSAGE());
 END CATCH
 
@@ -137,6 +139,7 @@ BEGIN TRY
     INSERT INTO @Resultados VALUES (N'Pago validado no se reprocesa', 'FALLA', N'Se aprobó dos veces');
 END TRY
 BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
     INSERT INTO @Resultados VALUES (N'Pago validado no se reprocesa', CASE WHEN ERROR_NUMBER() = 50033 THEN 'OK' ELSE 'FALLA' END, ERROR_MESSAGE());
 END CATCH
 
@@ -147,6 +150,7 @@ BEGIN TRY
     INSERT INTO @Resultados VALUES (N'Solo validadores registran ingresos', 'FALLA', N'Se aceptó');
 END TRY
 BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
     INSERT INTO @Resultados VALUES (N'Solo validadores registran ingresos', CASE WHEN ERROR_NUMBER() = 50403 THEN 'OK' ELSE 'FALLA' END, ERROR_MESSAGE());
 END CATCH
 
@@ -156,6 +160,7 @@ BEGIN TRY
     INSERT INTO @Resultados VALUES (N'Código de entrada inexistente', 'FALLA', N'Se aceptó');
 END TRY
 BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
     INSERT INTO @Resultados VALUES (N'Código de entrada inexistente', CASE WHEN ERROR_NUMBER() = 50404 THEN 'OK' ELSE 'FALLA' END, ERROR_MESSAGE());
 END CATCH
 
@@ -169,6 +174,7 @@ BEGIN TRY
     INSERT INTO @Resultados VALUES (N'Impide doble ingreso', 'FALLA', N'Se permitió reingresar');
 END TRY
 BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
     INSERT INTO @Resultados VALUES (N'Impide doble ingreso', CASE WHEN ERROR_NUMBER() = 50043 THEN 'OK' ELSE 'FALLA' END, ERROR_MESSAGE());
 END CATCH
 UPDATE dbo.Entradas SET Estado = 'Valida', FechaHoraIngreso = NULL, ValidadorPuertaUsuarioId = NULL, PuertaAcceso = @PuertaOriginal
